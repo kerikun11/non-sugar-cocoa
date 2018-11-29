@@ -9,26 +9,33 @@
 
 #include <M5Stack.h>
 
-#include "button.h"
-#include "speaker.h"
+#include "button_manager.h"
+#include "speaker_manager.h"
 
 namespace hardware {
 
-class Hardware : protected Button, private Speaker {
+class Hardware : protected ButtonManager, protected SpeakerManager {
 public:
   Hardware() {}
   void begin() {
     // M5Stack includes LCD, SD, M5.Btn, M5.Speaker,...
     M5.begin();
+    // Speaker
+    SpeakerManager::begin();
     // Button
     // TODO: これは使用例．実際にやることができたら置き換える
-    Button::onEvent([](Button::Kind k, Button::EventKind e) {
-      log_d("Button Kind: %s, Event: %s", Button::c_str(k), Button::c_str(e));
-    });
-    Button::begin();
-    // Speaker
-    Speaker::begin();
-    Speaker::push(Speaker::Music::Alarm, []() { log_d("Speaker Callback"); });
+    ButtonManager::onEvent(
+        [&](ButtonManager::Button k, ButtonManager::EventKind e) {
+          log_d("Button Kind: %s, Event: %s", ButtonManager::c_str(k),
+                ButtonManager::c_str(e));
+          if (k == ButtonManager::Button::A &&
+              e == ButtonManager::EventKind::Pressed)
+            SpeakerManager::play(SpeakerManager::Music::Alarm);
+          if (k == ButtonManager::Button::B &&
+              e == ButtonManager::EventKind::Pressed)
+            SpeakerManager::stop();
+        });
+    ButtonManager::begin();
     // IMU
     // TODO: IMU
   }
