@@ -1,3 +1,11 @@
+/**
+ * @file hardware.cpp
+ * @author Masashi Oyama (mabo168general@gmail.com)
+ * @brief ハードウェア周りの関数
+ * @version 0.1
+ * @date 2018-12-01
+ */
+
 #include<string>
 #include"hardware.h"
 #include<WiFi.h>
