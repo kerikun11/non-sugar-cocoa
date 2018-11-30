@@ -70,9 +70,11 @@ void hardware::Hardware::drawClock()const{
 }
 
 void hardware::Hardware::connectWiFi()const{
-    const char *SSID="Bob";
-    const char *passward="12345678";
-    WiFi.begin(SSID,passward);//デバッグ環境によってSSIDとパスワードは変更してください
+    //普通はSSIDとpassを引数に渡してやる
+    //const char *SSID="ssid";
+    //const char *passward="passward";
+    //WiFi.begin(SSID,passward);//デバッグ環境によってSSIDとパスワードは変更してください
+    WiFi.begin();//前回接続していたWiFiへの接続をさせる
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
