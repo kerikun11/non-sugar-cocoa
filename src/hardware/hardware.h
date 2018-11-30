@@ -20,6 +20,8 @@ public:
   void begin() {
     // M5Stack includes LCD, SD, M5.Btn, M5.Speaker,...
     M5.begin();
+    //時計合わせ
+    initClock();
     // Speaker
     SpeakerManager::begin();
     // Button
@@ -27,10 +29,15 @@ public:
     ButtonManager::onEvent([&](Button k, ButtonManager::EventKind e) {
       log_d("Button Kind: %s, Event: %s", ButtonManager::c_str(k),
             ButtonManager::c_str(e));
-      if (k == Button::A && e == ButtonManager::EventKind::Pressed)
+      if (k == Button::A && e == ButtonManager::EventKind::Pressed){
         SpeakerManager::play(SpeakerManager::Music::Alarm);
-      if (k == Button::B && e == ButtonManager::EventKind::Pressed)
+      }
+      if (k == Button::B && e == ButtonManager::EventKind::Pressed){
         SpeakerManager::stop();
+      }
+      if(k==Button::C && e==ButtonManager::EventKind::Pressed){
+        drawClock();
+      }
     });
     ButtonManager::begin();
     // IMU
@@ -38,6 +45,10 @@ public:
   }
 
 private:
+  void drawClock()const;
+  void connectWiFi()const;
+  void disconnectWiFi()const;
+  void initClock()const;
 };
 
 }; // namespace hardware
