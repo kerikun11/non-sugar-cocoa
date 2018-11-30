@@ -24,17 +24,14 @@ public:
     SpeakerManager::begin();
     // Button
     // TODO: これは使用例．実際にやることができたら置き換える
-    ButtonManager::onEvent(
-        [&](ButtonManager::Button k, ButtonManager::EventKind e) {
-          log_d("Button Kind: %s, Event: %s", ButtonManager::c_str(k),
-                ButtonManager::c_str(e));
-          if (k == ButtonManager::Button::A &&
-              e == ButtonManager::EventKind::Pressed)
-            SpeakerManager::play(SpeakerManager::Music::Alarm);
-          if (k == ButtonManager::Button::B &&
-              e == ButtonManager::EventKind::Pressed)
-            SpeakerManager::stop();
-        });
+    ButtonManager::onEvent([&](Button k, ButtonManager::EventKind e) {
+      log_d("Button Kind: %s, Event: %s", ButtonManager::c_str(k),
+            ButtonManager::c_str(e));
+      if (k == Button::A && e == ButtonManager::EventKind::Pressed)
+        SpeakerManager::play(SpeakerManager::Music::Alarm);
+      if (k == Button::B && e == ButtonManager::EventKind::Pressed)
+        SpeakerManager::stop();
+    });
     ButtonManager::begin();
     // IMU
     // TODO: IMU

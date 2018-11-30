@@ -12,13 +12,13 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
+#include "button.h"
+
 namespace hardware {
 
 /// M5Stack のボタンを監視してイベントを発生させるクラス
 class ButtonManager {
 public:
-  /// ボタンの種類
-  enum class Button { A, B, C };
   /// ボタン名の表示用
   static const char *c_str(Button k) {
     static const char *names[] = {"A", "B", "C"};
