@@ -11,10 +11,13 @@
 
 #include "button_manager.h"
 #include "speaker_manager.h"
+#include "ticker.h"
 
 namespace hardware {
 
-class Hardware : protected ButtonManager, protected SpeakerManager {
+class Hardware : protected ButtonManager,
+                 protected SpeakerManager,
+                 protected Ticker {
 public:
   Hardware() {}
   void begin() {
@@ -28,6 +31,12 @@ public:
     ButtonManager::begin();
     // IMU
     // TODO: IMU
+    // Ticker
+    Ticker::begin();
+  }
+  /// Tickerイベントを割り当てする
+  void onTickEvent(Ticker::EventCallback callback) {
+    Ticker::onEvent(callback);
   }
   void onButtonEvent(ButtonManager::EventCallback callback) {
     ButtonManager::onEvent(callback);
