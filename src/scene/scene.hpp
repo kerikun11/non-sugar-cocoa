@@ -50,23 +50,23 @@ public:
       event_n = 3;
       break;
     }
-    int n = event_n << 4 | button_n;
+    int n = (event_n << 4) | button_n;
     switch (n) {
     case 0x11:
       return buttonAPressed();
-    case 0x12:
-      return buttonAReleased();
-    case 0x13:
-      return buttonARepeated();
     case 0x21:
+      return buttonAReleased();
+    case 0x31:
+      return buttonARepeated();
+    case 0x12:
       return buttonBPressed();
     case 0x22:
       return buttonBReleased();
-    case 0x23:
-      return buttonBRepeated();
-    case 0x31:
-      return buttonCPressed();
     case 0x32:
+      return buttonBRepeated();
+    case 0x13:
+      return buttonCPressed();
+    case 0x23:
       return buttonCReleased();
     case 0x33:
       return buttonCRepeated();
