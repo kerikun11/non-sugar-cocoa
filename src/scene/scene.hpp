@@ -79,28 +79,28 @@ public:
   /// ボタンAが押されたとき呼ばれる。
   virtual EventResult buttonAPressed() { return EventResultKind::Continue; }
 
-  /// ボタンAが長押しされたとき、定期的に呼ばれる。
+  /// ボタンAが離されたとき呼ばれる。
   virtual EventResult buttonAReleased() { return EventResultKind::Continue; }
 
-  /// ボタンAが離されたとき呼ばれる。
+  /// ボタンAが長押しされたとき、定期的に呼ばれる。
   virtual EventResult buttonARepeated() { return buttonAPressed(); }
 
   /// ボタンBが押されたとき呼ばれる。
   virtual EventResult buttonBPressed() { return EventResultKind::Continue; }
 
-  /// ボタンBが長押しされたとき、定期的に呼ばれる。
+  /// ボタンBが離されたとき呼ばれる。
   virtual EventResult buttonBReleased() { return EventResultKind::Continue; }
 
-  /// ボタンBが離されたとき呼ばれる。
+  /// ボタンBが長押しされたとき、定期的に呼ばれる。
   virtual EventResult buttonBRepeated() { return buttonBPressed(); }
 
   /// ボタンCが押されたとき呼ばれる。
   virtual EventResult buttonCPressed() { return EventResultKind::Continue; }
 
-  /// ボタンCが長押しされたとき、定期的に呼ばれる。
+  /// ボタンCが離されたとき呼ばれる。
   virtual EventResult buttonCReleased() { return EventResultKind::Continue; }
 
-  /// ボタンCが離されたとき呼ばれる。
+  /// ボタンCが長押しされたとき、定期的に呼ばれる。
   virtual EventResult buttonCRepeated() { return buttonCPressed(); }
 };
 } // namespace scene

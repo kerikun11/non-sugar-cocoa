@@ -55,6 +55,7 @@ protected:
   }
 
 private:
+  /// イベントの読み替え
   ButtonEventKind
   buttonEventToSceneEvent(hardware::ButtonManager::EventKind event) {
     switch (event) {
