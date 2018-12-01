@@ -27,11 +27,10 @@ public:
     m_hardware = hardware;
     // イベントを割り当てる
     m_hardware->onButtonEvent(
-        [&](hardware::Button button, hardware::ButtonManager::EventKind event) {
+        [&](hardware::Button button, hardware::ButtonEventKind event) {
           log_d("Button: %s, Event: %s", hardware::ButtonManager::c_str(button),
                 hardware::ButtonManager::c_str(event));
-          updateStack(m_scenes.back()->buttonEventReceived(
-              button, buttonEventToSceneEvent(event)));
+          updateStack(m_scenes.back()->buttonEventReceived(button, event));
         });
     m_hardware->onTickEvent([&]() { updateStack(m_scenes.back()->tick()); });
     // 初期状態は時刻表示。
@@ -56,21 +55,6 @@ protected:
     } break;
     case EventResultKind::ReplaceScene:
       break;
-    }
-  }
-
-private:
-  /// イベントの読み替え
-  ButtonEventKind
-  buttonEventToSceneEvent(hardware::ButtonManager::EventKind event) {
-    switch (event) {
-    case hardware::ButtonManager::EventKind::Pressed:
-      return ButtonEventKind::Pressed;
-    case hardware::ButtonManager::EventKind::Released:
-      return ButtonEventKind::Released;
-    default:
-      throw std::runtime_error("unimplemented");
-      return ButtonEventKind::Repeated;
     }
   }
 };
