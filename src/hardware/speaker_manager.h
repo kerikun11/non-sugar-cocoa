@@ -22,6 +22,18 @@ public:
   enum class Music {
     Alarm,
   };
+  /// 音楽をキュー
+  void play(Music m = Music::Alarm) {
+    auto qi = new QueueItem;
+    qi->e = Event::Play;
+    qi->m = m;
+    xQueueSendToBack(eventQueue, &qi, 0);
+  }
+  void stop() {
+    auto qi = new QueueItem;
+    qi->e = Event::Stop;
+    xQueueSendToBack(eventQueue, &qi, 0);
+  }
 
 protected:
   void begin() {
@@ -36,19 +48,6 @@ protected:
         "SpeakerManager", stackSize, this, uxPriority, NULL);
   }
 
-  /// 音楽をキュー
-  void play(Music m = Music::Alarm) {
-    auto qi = new QueueItem;
-    qi->e = Event::Play;
-    qi->m = m;
-    xQueueSendToBack(eventQueue, &qi, 0);
-  }
-  void stop() {
-    auto qi = new QueueItem;
-    qi->e = Event::Stop;
-    xQueueSendToBack(eventQueue, &qi, 0);
-  }
-
 private:
   QueueHandle_t eventQueue;
 
@@ -61,6 +60,7 @@ private:
     Music m;
   };
 
+  // FreeRTOS によって実行される関数
   void task() {
     while (1) {
       QueueItem *qi;

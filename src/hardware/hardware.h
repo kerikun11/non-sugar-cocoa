@@ -15,16 +15,14 @@
 
 namespace hardware {
 
-class Hardware : protected ButtonManager,
-                 protected SpeakerManager,
-                 protected Ticker {
+class Hardware : public ButtonManager, public SpeakerManager, public Ticker {
 public:
   Hardware() {}
   void begin() {
     // M5Stack includes LCD, SD, M5.Btn, M5.Speaker,...
     M5.begin();
     //時計合わせ
-    initClock();
+    ntpInit();
     // Speaker
     SpeakerManager::begin();
     // Button
@@ -41,12 +39,14 @@ public:
   void onButtonEvent(ButtonManager::EventCallback callback) {
     ButtonManager::onEvent(callback);
   }
+  /// WiFi接続(ブロッキング)
+  void connectWiFi() const;
+  /// WiFi切断
+  void disconnectWiFi() const;
 
 private:
-  void drawClock() const;
-  void connectWiFi() const;
-  void disconnectWiFi() const;
-  void initClock() const;
+  /// 時計合わせ(ブロッキング)
+  void ntpInit() const;
 };
 
 }; // namespace hardware
