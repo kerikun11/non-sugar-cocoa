@@ -1,8 +1,5 @@
 #pragma once
 
-//おそらくmadwigkフィルタの有効化
-#define AHRS
-
 
 namespace hardware{
 
@@ -16,6 +13,16 @@ namespace hardware{
 			void stopCount(){ shaking_state = ShakingState::Stop; } 	//カウント再開/開始
 			void startCount(){ shaking_state = ShakingState::CountingUpperSwing; }	//カウント一次停止
 			int getCount(){ return count; };		//現在のカウント数
+  	
+			// イベント待機を開始する
+			void begin() {
+				// FreeRTOS により task() をバックグラウンドで実行
+				const uint16_t stackSize = 4096;
+				UBaseType_t uxPriority = 1;
+				xTaskCreate(
+						[](void *this_obj) { static_cast<ShakingManager *>(this_obj)->task(); },
+						"ShakingManager", stackSize, this, uxPriority, NULL);
+			}
 
 		protected:
 			enum class ShakingState{
