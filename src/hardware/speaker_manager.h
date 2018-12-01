@@ -36,18 +36,6 @@ protected:
         "SpeakerManager", stackSize, this, uxPriority, NULL);
   }
 
-  /// 音楽をキュー
-  void play(Music m = Music::Alarm) {
-    auto qi = new QueueItem;
-    qi->e = Event::Play;
-    qi->m = m;
-    xQueueSendToBack(eventQueue, &qi, 0);
-  }
-  void stop() {
-    auto qi = new QueueItem;
-    qi->e = Event::Stop;
-    xQueueSendToBack(eventQueue, &qi, 0);
-  }
 
 private:
   QueueHandle_t eventQueue;

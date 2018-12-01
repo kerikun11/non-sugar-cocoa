@@ -8,6 +8,7 @@
 #include "../hardware/button_manager.h"
 #include "../hardware/hardware.h"
 #include "scene.hpp"
+#include "scene_clock.hpp"
 
 namespace scene {
 /// シーン管理機構。
@@ -23,11 +24,17 @@ public:
   void initialize(const std::shared_ptr<hardware::Hardware> &hardware) {
     // ハードウェア管理機構を記憶する。
     m_hardware = hardware;
+    // イベントを割り当てる
+    m_hardware->onButtonEvent(
+        [&](hardware::Button button, hardware::ButtonManager::EventKind event) {
+          updateStack(m_scenes.back()->buttonEventReceived(
+              button, buttonEventToSceneEvent(event)));
+        });
+    m_hardware->onTickEvent([&]() { updateStack(m_scenes.back()->tick()); });
     // 初期状態は時刻表示。
-    // m_scenes.push(std::unique_ptr(new ClockScene(m_hardware)));
-    throw std::runtime_error(
-        "Unimplemened: Scene for clock is not yet defined");
+    m_scenes.push_back(std::unique_ptr<SceneClock>(new SceneClock(m_hardware)));
   }
+  void tick() { updateStack(m_scenes.back()->tick()); }
 
 protected:
   /// シーンのイベント処理結果を受けてスタックを更新する。
@@ -45,6 +52,20 @@ protected:
     } break;
     case EventResultKind::ReplaceScene:
       break;
+    }
+  }
+
+private:
+  ButtonEventKind
+  buttonEventToSceneEvent(hardware::ButtonManager::EventKind event) {
+    switch (event) {
+    case hardware::ButtonManager::EventKind::Pressed:
+      return ButtonEventKind::Pressed;
+    case hardware::ButtonManager::EventKind::Released:
+      return ButtonEventKind::Released;
+    default:
+      throw std::runtime_error("unimplemented");
+      return ButtonEventKind::Repeated;
     }
   }
 };
