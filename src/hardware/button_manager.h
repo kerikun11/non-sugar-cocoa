@@ -48,6 +48,16 @@ protected:
         [](void *this_obj) { static_cast<ButtonManager *>(this_obj)->task(); },
         "ButtonManager", stackSize, this, uxPriority, NULL);
   }
+  bool isPressed(Button button) {
+    switch (button) {
+    case Button::A:
+      return M5.BtnA.isPressed();
+    case Button::B:
+      return M5.BtnB.isPressed();
+    case Button::C:
+      return M5.BtnC.isPressed();
+    }
+  }
 
 private:
   // サンプリング周期
