@@ -13,6 +13,8 @@
 #include "speaker_manager.h"
 #include "ticker.h"
 
+#include <memory>
+
 namespace hardware {
 
 class Hardware : public ButtonManager, public SpeakerManager, public Ticker {

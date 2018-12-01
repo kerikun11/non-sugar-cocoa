@@ -32,6 +32,7 @@ struct EventResult {
   void *data;
 
   EventResult(EventResultKind kind) : kind(kind), data(nullptr) {}
+  EventResult(EventResultKind kind, void *data) : kind(kind), data(data) {}
 };
 
 /// Button event kind.
