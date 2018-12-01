@@ -2,11 +2,12 @@
 #ifndef _INCLUDE_SCENE_HPP_
 #define _INCLUDE_SCENE_HPP_
 
-#include "../hardware/hardware.h"
+#include "../hardware/button.h"
 #include "event.hpp"
 
 namespace scene {
-using Button = hardware::Button;
+using hardware::Button;
+using hardware::ButtonEventKind;
 
 /// シーンの基底クラス。
 class Scene {

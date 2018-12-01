@@ -34,16 +34,6 @@ struct EventResult {
   EventResult(EventResultKind kind) : kind(kind), data(nullptr) {}
   EventResult(EventResultKind kind, void *data) : kind(kind), data(data) {}
 };
-
-/// Button event kind.
-enum class ButtonEventKind {
-  /// Pressed.
-  Pressed,
-  /// Released.
-  Released,
-  /// Being pressed for a while.
-  Repeated,
-};
 } // namespace scene
 
 #endif
