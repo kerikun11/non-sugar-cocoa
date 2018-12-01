@@ -41,7 +41,6 @@ public:
   void onButtonEvent(ButtonManager::EventCallback callback) {
     ButtonManager::onEvent(callback);
   }
-  void onTickEvent(std::function<void()> callback) {}
 
 private:
   void drawClock() const;

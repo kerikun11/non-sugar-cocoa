@@ -34,7 +34,6 @@ public:
     // 初期状態は時刻表示。
     m_scenes.push_back(std::unique_ptr<SceneClock>(new SceneClock(m_hardware)));
   }
-  void tick() { updateStack(m_scenes.back()->tick()); }
 
 protected:
   /// シーンのイベント処理結果を受けてスタックを更新する。
