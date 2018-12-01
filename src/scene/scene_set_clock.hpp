@@ -1,5 +1,5 @@
 /**
- * @file scene_set.cpp
+ * @file scene_set_clock.cpp
  * @author Masashi Oyama (mabo168general@gmail.com)
  * @brief 時刻合わせ場面のクラス
  * @version 0.1
@@ -8,29 +8,64 @@
 
 #pragma once
 
-#include "hardware/hardware.h"
-// #include "scene/scene.hpp"
+#include "../hardware/hardware.h"
+#include "scene.hpp"
 
 namespace scene {
 
 /// Scene を継承する
-// class SceneSetClock : Scene {
-class SceneSetClock {
+class SceneSetClock : public Scene {
 public:
-  uint8_t m_hour, m_min, m_sec; //時刻
-  int m_process; //編集する場所。この書き方は汚い。(0:時間 1:分 2:秒)
-
   SceneSetClock() {}
 
-  void initialize() {
+  /// シーンがスタックのトップに来たとき呼ばれる。
+  virtual EventResult activated() override {
+    log_i("SceneSetAlarm activated()");
     //実際には、すでに記録されている時刻通りに初期化する
     m_hour = 0;
     m_min = 0;
     m_sec = 0;
     //その他の初期化
     m_process = 0;
+    // ごみを消去
+    // M5.Lcd.fillScreen(0);
+    return EventResultKind::Continue;
   }
-  void inclement() {
+
+  /// 定期的に (タイマーイベントごとに) 呼ばれる。
+  virtual EventResult tick() override {
+    // TODO: 時刻が変わったときだけ更新
+    updateDisplayClock();
+    return EventResultKind::Continue;
+  }
+
+  virtual EventResult buttonAPressed() override {
+    proceedProcess();
+    updateDisplayClock();
+    return EventResultKind::Continue;
+  }
+  virtual EventResult buttonBPressed() override {
+    increment();
+    updateDisplayClock();
+    return EventResultKind::Continue;
+  }
+  virtual EventResult buttonCPressed() override {
+    // TODO: アラーム設定完了の処理
+    return EventResultKind::Finish;
+  }
+
+private:
+  uint8_t m_hour, m_min, m_sec; //時刻
+  int m_process; //編集する場所。この書き方は汚い。(0:時間 1:分 2:秒)
+
+  void proceedProcess() {
+    //編集箇所を次に進める
+    m_process = (m_process + 1) % 3;
+    //ディスプレイの更新
+    updateDisplayClock();
+  }
+
+  void increment() {
     //数値をインクリメント
     switch (m_process) {
     case (0):
@@ -43,8 +78,6 @@ public:
       m_sec = (m_sec + 1) % 60;
       break;
     }
-    //ディスプレイの更新
-    updateDisplayClock();
   }
   void decrement() {
     //数値をデクリメント
@@ -59,23 +92,7 @@ public:
       m_sec = (m_sec + 59) % 60;
       break;
     }
-    //ディスプレイの更新
-    updateDisplayClock();
   }
-  void proceedProcess() {
-    //編集箇所を次に進める
-    m_process = (m_process + 1) % 3;
-    //ディスプレイの更新
-    updateDisplayClock();
-  }
-
-  void update() {
-
-    //いずれの値が変更されても描画
-    updateDisplayClock();
-  }
-
-private:
   void updateDisplayClock() const {
     M5.Lcd.print(m_hour);
     M5.Lcd.print(":");

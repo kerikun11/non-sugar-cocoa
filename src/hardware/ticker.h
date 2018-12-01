@@ -36,7 +36,7 @@ protected:
 
 private:
   // Tick 周期
-  static constexpr int PeriodMillis = 10;
+  static constexpr int PeriodMillis = 100;
   // コールバック関数のポインタ
   EventCallback eventCallback = nullptr;
 

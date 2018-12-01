@@ -10,6 +10,7 @@
 #include "hardware/hardware.h"
 #include "scene/event.hpp"
 #include "scene/scene.hpp"
+#include "scene_set_clock.hpp"
 
 namespace scene {
 
@@ -22,21 +23,24 @@ public:
 
   /// 定期的に (タイマーイベントごとに) 呼ばれる。
   virtual EventResult tick() override {
+    // TODO: 時刻が変わったときだけ更新
     updateDisplayClock();
-    return scene::EventResult(scene::EventResultKind::Continue);
+    return EventResultKind::Continue;
   }
 
   /// シーンがスタックのトップに来たとき呼ばれる。
   virtual EventResult activated() override {
     // ごみを消去
-    M5.Lcd.clearDisplay();
+    // M5.Lcd.fillScreen(0);
+    log_i("SceneClock activated()");
     return EventResultKind::Continue;
   }
 
-  /// 一時的
-  virtual EventResult buttonAPressed() {
-    updateDisplayClock();
-    return EventResultKind::Continue;
+  /// ボタン
+  virtual EventResult buttonAPressed() override {
+    /// アラーム設定へ
+    return EventResult(EventResultKind::PushScene,
+                       static_cast<void *>(new SceneSetClock()));
   }
 
 protected:

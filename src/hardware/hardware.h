@@ -13,7 +13,6 @@
 #include "speaker_manager.h"
 #include "ticker.h"
 
-#include "scene/scene_set.hpp"
 #include <memory>
 
 namespace hardware {
@@ -28,10 +27,6 @@ public:
     ntpInit();
     // Speaker
     SpeakerManager::begin();
-    // Scene
-    m_scene = std::shared_ptr<scene::SceneSetClock>(new scene::SceneSetClock());
-    m_scene->initialize();
-    m_scene->update();
     // Button
     ButtonManager::begin();
     // IMU
