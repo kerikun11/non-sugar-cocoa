@@ -34,6 +34,17 @@ public:
   /// ボタンイベントのコールバック関数型
   typedef std::function<void(Button, EventKind)> EventCallback;
 
+  bool isPressed(Button button) {
+    switch (button) {
+    case Button::A:
+      return M5.BtnA.isPressed();
+    case Button::B:
+      return M5.BtnB.isPressed();
+    case Button::C:
+      return M5.BtnC.isPressed();
+    }
+  }
+
 protected:
   // イベントコールバックの登録
   void onEvent(EventCallback eventCallback = nullptr) {
