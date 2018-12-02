@@ -11,10 +11,11 @@
 
 #include "button_manager.h"
 #include "speaker_manager.h"
+#include "ShakingManager.hpp"
 
 namespace hardware {
 
-class Hardware : protected ButtonManager, protected SpeakerManager {
+class Hardware : protected ButtonManager, protected SpeakerManager ,public ShakingManager{
 public:
   Hardware() {}
   void begin() {
@@ -36,8 +37,12 @@ public:
             SpeakerManager::stop();
         });
     ButtonManager::begin();
-    // IMU
-    // TODO: IMU
+
+
+    // Shaking
+    //IMUの初期化とWireの初期化．振動検知タスクの開始
+    ShakingManager::begin();
+    
   }
 
 private:
