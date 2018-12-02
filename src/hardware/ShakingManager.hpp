@@ -1,4 +1,5 @@
 #pragma once
+#include<utility/MPU9250.h>
 
 
 namespace hardware{
@@ -30,9 +31,12 @@ namespace hardware{
 				CountingLowerSwing,
 				Stop
 			};
+
+			MPU9250 IMU;
+
 			const float threshold_swing_angle_axis;	//1カウントと見なす，角速度の大きさ(正の値)
-			int counter;	//現在のカウント数
-			const int SamplingPeriod;	
+			int count;	//現在のカウント数
+			const int sampling_period;	
 			ShakingState shaking_state;		//カウント計測の状態
 			void updateMeasurement(); 	//IMU値の更新
 			void updateCount();		//振った回数の更新
@@ -43,7 +47,7 @@ namespace hardware{
 				// handleEvent の定期実行
 				portTickType xLastWakeTime = xTaskGetTickCount();
 				while (1) {
-					vTaskDelayUntil(&xLastWakeTime, PeriodMillis / portTICK_RATE_MS);
+					vTaskDelayUntil(&xLastWakeTime, sampling_period / portTICK_RATE_MS);
 
 					updateMeasurement();
 					updateCount();

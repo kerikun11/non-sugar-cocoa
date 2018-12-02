@@ -3,12 +3,13 @@
 #include<freertos/task.h>
 #include"ShakingManager.hpp"
 
+namespace hardware{
 
 
 //From sample program
 ShakingManager::ShakingManager(int _threshold_swing_angle_axis) :
 	threshold_swing_angle_axis(_threshold_swing_angle_axis),
-	counter(0),
+	count(0),
 	sampling_period(100),
 	shaking_state(ShakingState::Stop)
 {
@@ -135,7 +136,7 @@ void ShakingManager::updateMeasurement()
 void ShakingManager::updateCount(){
 
 		//とりあえずz方向の角速度のみを使って検知
-		auto swing_angle_velocity = M5.IMU.gz;
+		auto swing_angle_velocity = IMU.gz;
 
 		switch(shaking_state){
 
@@ -160,3 +161,5 @@ void ShakingManager::updateCount(){
 		}
 }
 
+
+};
