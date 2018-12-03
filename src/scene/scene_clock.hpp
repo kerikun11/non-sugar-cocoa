@@ -53,8 +53,16 @@ public:
 
 protected:
   std::shared_ptr<hardware::Hardware> m_hardware;
-
+  
   void updateDisplayClock(bool clean = false) {
+    //時刻描画
+    displayClock(clean);
+    //ボタン説明の描画
+    M5.Lcd.setTextColor(TFT_PINK, TFT_BLACK);
+    M5.Lcd.drawString("SET",42,205,4);
+  }
+
+  void displayClock(bool clean)const{
     static byte
         omm = 99,
         oss =
