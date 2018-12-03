@@ -67,20 +67,56 @@ private:
   // FreeRTOS によって実行される関数
   void task() {
     while (1) {
+      if (mp3 && mp3->isRunning()) {
+        // 以下の関数しばしばフリーズ
+        if (!mp3->loop()) {
+          id3->seek(0, SEEK_SET);
+        }
+      }
       QueueItem *qi;
-      xQueueReceive(eventQueue, &qi, portMAX_DELAY);
+      if (pdFALSE == xQueueReceive(eventQueue, &qi, 1 / portTICK_PERIOD_MS))
+        continue;
       auto item = std::unique_ptr<QueueItem>{qi};
       switch (item->e) {
       case Event::Play:
         log_d("Play");
-        M5.Speaker.beep();
+        // M5.Speaker.beep();
+        mp3_start();
         break;
       case Event::Stop:
         log_d("Stop");
-        M5.Speaker.mute();
+        // M5.Speaker.mute();
+        mp3_stop();
         break;
       }
     }
+  }
+
+public:
+  std::unique_ptr<AudioGeneratorMP3> mp3;
+  std::unique_ptr<AudioFileSourceSD> file;
+  std::unique_ptr<AudioOutputI2S> out;
+  std::unique_ptr<AudioFileSourceID3> id3;
+
+  void mp3_start() {
+    // static bool initialized = false;
+    // if (!initialized) {
+    //   initialized = true;
+    file = std::make_unique<AudioFileSourceSD>("/bachfugue.mp3");
+    id3 = std::make_unique<AudioFileSourceID3>(file.get());
+    out = std::make_unique<AudioOutputI2S>(0, 1);
+    mp3 = std::make_unique<AudioGeneratorMP3>();
+    // }
+    out->SetOutputModeMono(true);
+    out->SetGain(0.1);
+    mp3->begin(id3.get(), out.get());
+  }
+  void mp3_stop() {
+    mp3->stop();
+    file.reset();
+    id3.reset();
+    out.reset();
+    mp3.reset();
   }
 };
 
