@@ -14,6 +14,12 @@
 #include <freertos/queue.h>
 #include <freertos/task.h>
 
+#include <AudioFileSourceID3.h>
+#include <AudioFileSourceSD.h>
+#include <AudioGeneratorMP3.h>
+#include <AudioOutputI2S.h>
+#include <HTTPClient.h> //< 依存関係コンパイルエラーを防止
+
 namespace hardware {
 
 class SpeakerManager {
