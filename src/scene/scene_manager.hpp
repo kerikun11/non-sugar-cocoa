@@ -108,6 +108,22 @@ protected:
     }
   }
 };
+
+/// `SceneManager` へイベントを送信するための送信器。
+class SceneEventSender {
+private:
+  QueueHandle_t m_queue;
+
+public:
+  SceneEventSender() = default;
+  SceneEventSender(QueueHandle_t q) : m_queue{q} {}
+
+  /// 生イベントを送信する。
+  void send(std::unique_ptr<Event> ev) {
+    Event *p = ev.release();
+    xQueueSendToBack(m_queue, &p, 0);
+  }
+};
 } // namespace scene
 
 #endif

@@ -15,6 +15,7 @@
 
 std::shared_ptr<hardware::Hardware> hw;
 scene::SceneManager scene_manager;
+scene::SceneEventSender sceneEventSender;
 
 void setup() {
   // put your setup code here, to run once:
@@ -29,17 +30,19 @@ void setup() {
       xQueueCreate(EVENT_QUEUE_LENGTH, sizeof(scene::Event *));
   scene_manager.initialize(hw, queueToSceneManager);
 
+  sceneEventSender = scene::SceneEventSender{queueToSceneManager};
+
   // ハードウェア関係の設定。
 
   hw->onTickEvent([=]() {
-    scene::Event *ev = new scene::Event{scene::EventKind::Tick};
-    xQueueSendToBack(queueToSceneManager, ev, 0);
+    sceneEventSender.send(
+        std::make_unique<scene::Event>(scene::EventKind::Tick));
   });
   hw->onButtonEvent([=](hardware::Button bt, hardware::ButtonEventKind btk) {
     auto data = new std::shared_ptr<hardware::ButtonEvent>{
         new hardware::ButtonEvent{bt, btk}};
-    scene::Event *ev = new scene::Event{scene::EventKind::Button, data};
-    xQueueSendToBack(queueToSceneManager, ev, 0);
+    sceneEventSender.send(
+        std::make_unique<scene::Event>(scene::EventKind::Button, data));
   });
 }
 
