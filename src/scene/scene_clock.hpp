@@ -7,6 +7,7 @@
  */
 #pragma once
 
+#include<string>
 #include "hardware/hardware.h"
 #include "scene/event.hpp"
 #include "scene/scene.hpp"
@@ -55,19 +56,9 @@ protected:
   std::shared_ptr<hardware::Hardware> m_hardware;
   
   void updateDisplayClock(bool clean = false) {
-    //時刻描画
-    displayClock(clean);
-    //ボタン説明の描画
-    M5.Lcd.setTextColor(TFT_PINK, TFT_BLACK);
-    M5.Lcd.drawString("SET",42,205,4);
-  }
-
-  void displayClock(bool clean)const{
-    static byte
-        omm = 99,
-        oss =
-            99; //直前に描画を行った分・秒の値。これが現在時刻と異なっていたら描画する。分・秒が絶対に取りえない値で初期化することで、初めてのdrawClock()では描画処理が必ず発生するようにする
-    static byte xcolon = 0, xsecs = 0;
+    //アニメーションのための数値
+    static uint8_t frame=0;
+    frame++;
     //現在時刻の取得
     uint8_t hh = 0, mm = 0, ss = 0;
     struct tm timeinfo;
@@ -76,6 +67,30 @@ protected:
       mm = timeinfo.tm_min;
       ss = timeinfo.tm_sec;
     }
+    //時刻描画
+    displayClock(clean,hh,mm,ss);
+    //ボタン説明の描画
+    const int tMax=10,height=3,topY=200;
+    const int t=frame%tMax;
+    int y;//アニメーションのためのy方向変位
+    if(t<tMax/2){
+      y=topY-t*(t-tMax/2)/(tMax*tMax/16/height)+height;
+    }else{
+      y=topY+(t-tMax/2)*(t-tMax)/(tMax*tMax/16/height)+height;
+    }
+    M5.Lcd.setTextColor(TFT_PINK, TFT_BLACK);
+    M5.Lcd.fillRect(42,topY,50,y-topY,TFT_BLACK);//文字を消す
+    M5.Lcd.drawString("SET",42,y,4);//フォントサイズ4で3文字の描画を左ボタンの上にするなら、(42,205)に描画
+
+
+  }
+
+  void displayClock(bool clean,uint8_t hh,uint8_t mm,uint8_t ss)const{
+    static byte
+        omm = 99,
+        oss =
+            99; //直前に描画を行った分・秒の値。これが現在時刻と異なっていたら描画する。分・秒が絶対に取りえない値で初期化することで、初めてのdrawClock()では描画処理が必ず発生するようにする
+    static byte xcolon = 0, xsecs = 0;
 
     //描画準備
     if (clean) {
