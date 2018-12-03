@@ -21,6 +21,8 @@ public:
   /// シーンがスタックのトップに来たとき呼ばれる。
   virtual EventResult activated() override {
     log_i("SceneSetAlarm activated()");
+    // LCDのクリア
+    M5.Lcd.clear();
     //実際には、すでに記録されている時刻通りに初期化する
     m_hour = 0;
     m_min = 0;

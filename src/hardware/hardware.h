@@ -9,6 +9,7 @@
 
 #include <M5Stack.h>
 
+#include "shaking_manager.hpp"
 #include "button_manager.h"
 #include "speaker_manager.h"
 #include "ticker.h"
@@ -17,7 +18,11 @@
 
 namespace hardware {
 
-class Hardware : public ButtonManager, public SpeakerManager, public Ticker {
+class Hardware : public ButtonManager,
+                 public SpeakerManager,
+                 public Ticker,
+                 public ShakingManager {
+
 public:
   Hardware() {}
   void begin() {
@@ -29,8 +34,11 @@ public:
     SpeakerManager::begin();
     // Button
     ButtonManager::begin();
-    // IMU
-    // TODO: IMU
+
+    // Shaking
+    // IMUの初期化とWireの初期化．振動検知タスクの開始
+    ShakingManager::begin();
+
     // Ticker
     Ticker::begin();
   }
