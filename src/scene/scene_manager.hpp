@@ -74,12 +74,12 @@ public:
 
       // Pass the event to the top (currently active) scene.
       auto &currentScene = *m_scenes.back();
-      switch (ev->kind) {
+      switch (ev->kind()) {
       case EventKind::Tick:
         updateStack(currentScene.tick());
         break;
       case EventKind::Button: {
-        std::unique_ptr<ButtonEvent> bte(static_cast<ButtonEvent *>(ev->data));
+        auto bte = ev->buttonData();
         updateStack(currentScene.buttonEventReceived(bte->button, bte->kind));
       } break;
       }

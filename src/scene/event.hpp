@@ -2,6 +2,12 @@
 #ifndef _INCLUDE_EVENT_HPP_
 #define _INCLUDE_EVENT_HPP_
 
+#include <utility>
+
+#include <esp32-hal-log.h>
+
+#include "../hardware/button.h"
+
 namespace scene {
 /// イベントの種類。
 enum class EventKind {
@@ -15,17 +21,35 @@ enum class EventKind {
   Button,
 };
 
-struct Event {
+/// シーンに対するイベント。
+class Event {
+private:
   /// イベントの種類。
-  EventKind kind;
+  EventKind m_kind;
   /// 補助データ。
   ///
   /// ポインタの型は `kind` ごとに異なる。
   /// 補助データが不要なら nullptr を使う。
-  void *data;
+  void *m_data;
 
-  Event(EventKind kind) : kind(kind), data(nullptr) {}
-  Event(EventKind kind, void *data) : kind(kind), data(data) {}
+public:
+  Event(EventKind kind) : m_kind{kind}, m_data{} {}
+  Event(EventKind kind, void *data) : m_kind{kind}, m_data{data} {}
+  Event(const Event &) = delete;
+  Event(Event &&) = default;
+  ~Event() {
+    if (m_data) {
+      log_w("Memory leak detected: the additional data of a scene event was "
+            "not released!");
+    }
+  }
+
+  EventKind kind() const { return m_kind; }
+
+  std::unique_ptr<hardware::ButtonEvent> buttonData() {
+    return std::unique_ptr<hardware::ButtonEvent>(
+        static_cast<hardware::ButtonEvent *>(std::exchange(m_data, nullptr)));
+  }
 };
 
 /// イベント処理結果の種類。
