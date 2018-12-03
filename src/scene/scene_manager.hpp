@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 #include <esp32-hal-log.h>
@@ -122,6 +123,19 @@ public:
   void send(std::unique_ptr<Event> ev) {
     Event *p = ev.release();
     xQueueSendToBack(m_queue, &p, 0);
+  }
+
+  /// Tick イベントを送信する。
+  void tick() {
+    auto ev = std::make_unique<Event>(EventKind::Tick);
+    send(std::move(ev));
+  }
+
+  /// Button イベントを送信する。
+  void button(ButtonEvent bte) {
+    auto ev = std::make_unique<Event>(
+        EventKind::Button, std::make_unique<ButtonEvent>(bte).release());
+    send(std::move(ev));
   }
 };
 } // namespace scene

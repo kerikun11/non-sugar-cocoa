@@ -34,15 +34,9 @@ void setup() {
 
   // ハードウェア関係の設定。
 
-  hw->onTickEvent([=]() {
-    sceneEventSender.send(
-        std::make_unique<scene::Event>(scene::EventKind::Tick));
-  });
+  hw->onTickEvent([=]() { sceneEventSender.tick(); });
   hw->onButtonEvent([=](hardware::Button bt, hardware::ButtonEventKind btk) {
-    auto data = new std::shared_ptr<hardware::ButtonEvent>{
-        new hardware::ButtonEvent{bt, btk}};
-    sceneEventSender.send(
-        std::make_unique<scene::Event>(scene::EventKind::Button, data));
+    sceneEventSender.button(ButtonEvent{bt, btk});
   });
 }
 
