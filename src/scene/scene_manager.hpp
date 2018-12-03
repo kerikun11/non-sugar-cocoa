@@ -48,6 +48,7 @@ protected:
       break;
     case EventResultKind::Finish:
       m_scenes.pop_back();
+      updateStack(m_scenes.back()->activated());
       break;
     case EventResultKind::PushScene: {
       std::unique_ptr<Scene> scene(static_cast<Scene *>(result.data));

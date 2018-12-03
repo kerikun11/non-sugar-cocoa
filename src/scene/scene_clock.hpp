@@ -10,6 +10,7 @@
 #include "hardware/hardware.h"
 #include "scene/event.hpp"
 #include "scene/scene.hpp"
+#include "scene_alarming.hpp"
 #include "scene_set_clock.hpp"
 
 namespace scene {
@@ -31,7 +32,7 @@ public:
   /// シーンがスタックのトップに来たとき呼ばれる。
   virtual EventResult activated() override {
     // ごみを消去
-    // M5.Lcd.fillScreen(0);
+    updateDisplayClock(true); //< 完全再描画
     log_i("SceneClock activated()");
     return EventResultKind::Continue;
   }
@@ -43,10 +44,17 @@ public:
                        static_cast<void *>(new SceneSetClock()));
   }
 
+  /// ボタン
+  virtual EventResult buttonBPressed() override {
+    /// アラーム設定へ
+    return EventResult(EventResultKind::PushScene,
+                       static_cast<void *>(new SceneAlarming(m_hardware)));
+  }
+
 protected:
   std::shared_ptr<hardware::Hardware> m_hardware;
 
-  void updateDisplayClock() {
+  void updateDisplayClock(bool clean = false) {
     static byte
         omm = 99,
         oss =
@@ -62,6 +70,9 @@ protected:
     }
 
     //描画準備
+    if (clean) {
+      M5.Lcd.clear();
+    }
     //文字色設定
     M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
     //描画位置
@@ -71,7 +82,7 @@ protected:
 
     //描画処理
     //毎分の時間・分の描画（分が変更していれば、時間は変わっていなくても時間を描画しなおす）
-    if (omm != mm) {
+    if (clean || omm != mm) {
       // ommの更新をし、分の値が変わらないうちは描画処理を行わないようにする
       omm = mm;
       //時間の描画、0でいいので2桁目を描画する
@@ -92,7 +103,7 @@ protected:
       xsecs = xpos; // Sae seconds 'x' position for later display updates
     }
     //毎秒の秒の描画
-    if (oss != ss) {
+    if (clean || oss != ss) {
       // ossの更新をし、秒の値が変わっていないうちは描画処理を行わないようにする
       oss = ss;
       xpos = xsecs;

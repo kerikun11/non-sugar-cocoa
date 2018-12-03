@@ -9,7 +9,7 @@
 
 #include <M5Stack.h>
 
-#include "ShakingManager.hpp"
+#include "shaking_manager.hpp"
 #include "button_manager.h"
 #include "speaker_manager.h"
 #include "ticker.h"
