@@ -9,35 +9,54 @@
 
 #include <M5Stack.h>
 
+#include "shaking_manager.hpp"
 #include "button_manager.h"
 #include "speaker_manager.h"
+#include "ticker.h"
+
+#include <memory>
 
 namespace hardware {
 
-class Hardware : protected ButtonManager, protected SpeakerManager {
+class Hardware : public ButtonManager,
+                 public SpeakerManager,
+                 public Ticker,
+                 public ShakingManager {
+
 public:
   Hardware() {}
   void begin() {
     // M5Stack includes LCD, SD, M5.Btn, M5.Speaker,...
     M5.begin();
+    //時計合わせ
+    ntpInit();
     // Speaker
     SpeakerManager::begin();
     // Button
-    // TODO: これは使用例．実際にやることができたら置き換える
-    ButtonManager::onEvent([&](Button k, ButtonManager::EventKind e) {
-      log_d("Button Kind: %s, Event: %s", ButtonManager::c_str(k),
-            ButtonManager::c_str(e));
-      if (k == Button::A && e == ButtonManager::EventKind::Pressed)
-        SpeakerManager::play(SpeakerManager::Music::Alarm);
-      if (k == Button::B && e == ButtonManager::EventKind::Pressed)
-        SpeakerManager::stop();
-    });
     ButtonManager::begin();
-    // IMU
-    // TODO: IMU
+
+    // Shaking
+    // IMUの初期化とWireの初期化．振動検知タスクの開始
+    ShakingManager::begin();
+
+    // Ticker
+    Ticker::begin();
   }
+  /// Tickerイベントを割り当てする
+  void onTickEvent(Ticker::EventCallback callback) {
+    Ticker::onEvent(callback);
+  }
+  void onButtonEvent(ButtonManager::EventCallback callback) {
+    ButtonManager::onEvent(callback);
+  }
+  /// WiFi接続(ブロッキング)
+  void connectWiFi() const;
+  /// WiFi切断
+  void disconnectWiFi() const;
 
 private:
+  /// 時計合わせ(ブロッキング)
+  void ntpInit() const;
 };
 
 }; // namespace hardware
