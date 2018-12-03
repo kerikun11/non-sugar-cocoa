@@ -14,6 +14,15 @@
 #include "scene_alarming.hpp"
 #include "scene_set_clock.hpp"
 
+// コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#include <chrono>
+
 namespace scene {
 
 // 現在時刻を表示する Scene
@@ -60,15 +69,17 @@ protected:
     static uint8_t frame=0;
     frame++;
     //現在時刻の取得
-    uint8_t hh = 0, mm = 0, ss = 0;
+    int hh = 0, mm = 0, ss = 0,ms=0;
     struct tm timeinfo;
     if (getLocalTime(&timeinfo)) {
       hh = timeinfo.tm_hour;
       mm = timeinfo.tm_min;
       ss = timeinfo.tm_sec;
+      auto now=std::chrono::system_clock::now().time_since_epoch();
+      ms=std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
     }
     //時刻描画
-    displayClock(clean,hh,mm,ss);
+    displayClock(clean,hh,mm,ss,ms);
     //ボタン説明の描画
     const int tMax=10,height=3,topY=200;
     const int t=frame%tMax;
@@ -85,12 +96,14 @@ protected:
 
   }
 
-  void displayClock(bool clean,uint8_t hh,uint8_t mm,uint8_t ss)const{
+  void displayClock(bool clean,int hh,int mm,int ss,int ms)const{
+    //直前に描画を行った分・秒の値。これが現在時刻と異なっていたら描画する。分・秒が絶対に取りえない値で初期化することで、初めてのdrawClock()では描画処理が必ず発生するようにする
     static byte
         omm = 99,
-        oss =
-            99; //直前に描画を行った分・秒の値。これが現在時刻と異なっていたら描画する。分・秒が絶対に取りえない値で初期化することで、初めてのdrawClock()では描画処理が必ず発生するようにする
+        oss = 99; 
     static byte xcolon = 0, xsecs = 0;
+    // 明るく描画するか
+    static bool lightColon=true;//500msごとに切り替える
 
     //描画準備
     if (clean) {
@@ -110,8 +123,7 @@ protected:
       omm = mm;
       //時間の描画、0でいいので2桁目を描画する
       if (hh < 10) {
-        xpos += M5.Lcd.drawChar('0', xpos, ypos,
-                                8); // Add hours leading zero for 24 hr clock
+        xpos += M5.Lcd.drawChar('0', xpos, ypos,8); // Add hours leading zero for 24 hr clock
       }
       xpos += M5.Lcd.drawNumber(hh, xpos, ypos, 8); // Draw hours
       xcolon = xpos; //秒の描画において":"を描画するのに用いる
@@ -126,13 +138,14 @@ protected:
       xsecs = xpos; // Sae seconds 'x' position for later display updates
     }
     //毎秒の秒の描画
-    if (clean || oss != ss) {
+    if(clean || lightColon!=(ms%1000<500)){
       // ossの更新をし、秒の値が変わっていないうちは描画処理を行わないようにする
       oss = ss;
       xpos = xsecs;
+      lightColon=(ms%1000<500);
       //":"の描画
-      if (ss % 2) {
-        //奇数秒は、":"を暗く描画
+      if(!lightColon){
+        // lightColonを見て：の明るさの描画を決める
         M5.Lcd.setTextColor(0x39C4, TFT_BLACK); //文字色を暗くする
         M5.Lcd.drawChar(
             ':', xcolon, ypos - 8,
