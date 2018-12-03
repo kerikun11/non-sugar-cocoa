@@ -24,20 +24,20 @@ public:
   /// 定期的に (タイマーイベントごとに) 呼ばれる。
   virtual EventResult tick() override {
 
-    auto now_count = m_hardware->getCount();
+    auto now_count = m_hardware->shaking().getCount();
 
     if (now_count >= max_count) {
-      m_hardware->stop(); //音の停止
+      m_hardware->speaker().stop(); //音の停止
 
       //カウントの停止とリセット
-      m_hardware->stopCount();
-      m_hardware->resetCount();
+      m_hardware->shaking().stopCount();
+      m_hardware->shaking().resetCount();
 
       log_i("SceneAlerming Finish");
       return EventResultKind::Finish;
     }
 
-    int remain_count = max_count - m_hardware->getCount();
+    int remain_count = max_count - m_hardware->shaking().getCount();
     updateLcd(remain_count);
 
     return EventResultKind::Continue;
@@ -52,11 +52,11 @@ public:
     M5.Lcd.clear();
 
     //アラーム音の再生を開始
-    m_hardware->play(hardware::Hardware::SpeakerManager::Music::Alarm);
+    m_hardware->speaker().play(hardware::SpeakerManager::Music::Alarm);
 
     // hardware側の振動回数の初期化(Countを使用するのは一人だと仮定．よそで勝手に操作されると困る)
-    m_hardware->resetCount();
-    m_hardware->startCount();
+    m_hardware->shaking().resetCount();
+    m_hardware->shaking().startCount();
 
     return EventResultKind::Continue;
   }

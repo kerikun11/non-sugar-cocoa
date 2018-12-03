@@ -20,7 +20,6 @@ public:
   /// ボタンイベントのコールバック関数型
   typedef std::function<void()> EventCallback;
 
-protected:
   // イベントコールバックの登録
   void onEvent(EventCallback eventCallback = nullptr) {
     this->eventCallback = eventCallback;
