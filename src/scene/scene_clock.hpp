@@ -11,7 +11,7 @@
 #include "scene/event.hpp"
 #include "scene/scene.hpp"
 #include "scene_alarming.hpp"
-#include "scene_set_clock.hpp"
+#include "scene_configure_alarm.hpp"
 
 namespace scene {
 
@@ -41,7 +41,7 @@ public:
   virtual EventResult buttonAPressed() override {
     /// アラーム設定へ
     return EventResult(EventResultKind::PushScene,
-                       static_cast<void *>(new SceneSetClock()));
+                       static_cast<void *>(new SceneConfigureAlarm()));
   }
 
   /// ボタン
