@@ -15,4 +15,14 @@ enum class ButtonEventKind {
   Repeated,
 };
 
+/// ボタンのイベント
+struct ButtonEvent {
+  /// ボタン
+  Button button;
+  /// ボタンの押され方
+  ButtonEventKind kind;
+
+  ButtonEvent(Button b, ButtonEventKind k) : button(b), kind(k) {}
+};
+
 }; // namespace hardware

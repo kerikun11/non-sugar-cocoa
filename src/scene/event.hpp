@@ -9,6 +9,10 @@ enum class EventKind {
   ///
   /// 定期的に発生する。
   Tick,
+  /// ボタン関連イベント。
+  ///
+  /// データ部に `std::unique_ptr<ButtonEvent>` を持つ。
+  Button,
 };
 
 struct Event {

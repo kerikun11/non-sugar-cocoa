@@ -3,17 +3,21 @@
 #define _INCLUDE_SCENE_MANAGER_HPP_
 
 #include <cstdlib>
-#include <esp32-hal-log.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/queue.h>
 #include <stdexcept>
 #include <vector>
 
+#include <esp32-hal-log.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
+
+#include "../hardware/button.h"
 #include "../hardware/button_manager.h"
 #include "../hardware/hardware.h"
 #include "scene.hpp"
 #include "scene_clock.hpp"
 #include "scene_set_clock.hpp"
+
+using hardware::ButtonEvent;
 
 namespace scene {
 /// シーン管理機構。
@@ -73,6 +77,10 @@ public:
       case EventKind::Tick:
         updateStack(currentScene.tick());
         break;
+      case EventKind::Button: {
+        std::unique_ptr<ButtonEvent> bte(static_cast<ButtonEvent *>(ev->data));
+        updateStack(currentScene.buttonEventReceived(bte->button, bte->kind));
+      } break;
       }
     }
 

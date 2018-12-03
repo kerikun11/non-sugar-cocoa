@@ -8,6 +8,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
+#include "hardware/button.h"
 #include "hardware/hardware.h"
 #include "scene/event.hpp"
 #include "scene/scene_manager.hpp"
@@ -29,8 +30,15 @@ void setup() {
   scene_manager.initialize(hw, queueToSceneManager);
 
   // ハードウェア関係の設定。
+
   hw->onTickEvent([=]() {
     scene::Event *ev = new scene::Event{scene::EventKind::Tick};
+    xQueueSendToBack(queueToSceneManager, ev, 0);
+  });
+  hw->onButtonEvent([=](hardware::Button bt, hardware::ButtonEventKind btk) {
+    auto data = new std::shared_ptr<hardware::ButtonEvent>{
+        new hardware::ButtonEvent{bt, btk}};
+    scene::Event *ev = new scene::Event{scene::EventKind::Button, data};
     xQueueSendToBack(queueToSceneManager, ev, 0);
   });
 }
