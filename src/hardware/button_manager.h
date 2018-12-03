@@ -42,8 +42,6 @@ public:
       return M5.BtnC.isPressed();
     }
   }
-
-protected:
   // イベントコールバックの登録
   void onEvent(EventCallback eventCallback = nullptr) {
     this->eventCallback = eventCallback;
