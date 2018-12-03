@@ -14,9 +14,9 @@
 namespace scene {
 
 /// Scene を継承する
-class SceneSetClock : public Scene {
+class SceneConfigureAlarm : public Scene {
 public:
-  SceneSetClock() {}
+  SceneConfigureAlarm() {}
 
   /// シーンがスタックのトップに来たとき呼ばれる。
   virtual EventResult activated() override {
@@ -30,7 +30,7 @@ public:
     //その他の初期化
     m_process = 0;
     // ごみを消去
-    // M5.Lcd.fillScreen(0);
+    M5.Lcd.clear();
     return EventResultKind::Continue;
   }
 
@@ -96,12 +96,6 @@ private:
     }
   }
   void updateDisplayClock() const {
-    M5.Lcd.print(m_hour);
-    M5.Lcd.print(":");
-    M5.Lcd.print(m_min);
-    M5.Lcd.print(":");
-    M5.Lcd.println(m_sec);
-
     //描画準備
     //文字色設定
     M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);

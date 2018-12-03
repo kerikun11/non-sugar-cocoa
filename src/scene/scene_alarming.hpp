@@ -10,7 +10,6 @@
 #include "hardware/hardware.h"
 #include "scene/event.hpp"
 #include "scene/scene.hpp"
-#include "scene_set_clock.hpp"
 
 namespace scene {
 

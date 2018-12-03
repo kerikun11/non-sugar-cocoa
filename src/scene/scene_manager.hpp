@@ -9,7 +9,6 @@
 #include "../hardware/hardware.h"
 #include "scene.hpp"
 #include "scene_clock.hpp"
-#include "scene_set_clock.hpp"
 
 namespace scene {
 /// シーン管理機構。
