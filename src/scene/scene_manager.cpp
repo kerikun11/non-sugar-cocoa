@@ -45,8 +45,7 @@ size_t SceneManager::processExternalEvents() {
     }
     if (isAlarmEvent) {
       auto alarmScene = std::unique_ptr<Scene>(new SceneAlarming(m_hardware));
-      m_scenes.push_back(std::move(alarmScene));
-      updateStack(m_scenes.back()->activated());
+      pushScene(std::move(alarmScene));
     }
   }
 

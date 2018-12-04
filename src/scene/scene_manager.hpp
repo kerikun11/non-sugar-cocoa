@@ -51,7 +51,7 @@ public:
   /// 処理されたイベントの個数を返す。
   size_t processExternalEvents();
 
-protected:
+private:
   /// シーンのイベント処理結果を受けてスタックを更新する。
   void updateStack(EventResult result) {
     switch (result.kind) {
@@ -64,16 +64,19 @@ protected:
       break;
     case EventResultKind::PushScene: {
       std::unique_ptr<Scene> scene(static_cast<Scene *>(result.data));
-      m_scenes.push_back(std::move(scene));
-      updateStack(m_scenes.back()->activated());
+      pushScene(std::move(scene));
     } break;
     case EventResultKind::ReplaceScene: {
       std::unique_ptr<Scene> scene(static_cast<Scene *>(result.data));
       m_scenes.pop_back();
-      m_scenes.push_back(std::move(scene));
-      updateStack(m_scenes.back()->activated());
+      pushScene(std::move(scene));
     } break;
     }
+  }
+  /// シーンをスタックに追加する。
+  void pushScene(std::unique_ptr<Scene> scene) {
+    m_scenes.push_back(std::move(scene));
+    updateStack(m_scenes.back()->activated());
   }
 };
 
