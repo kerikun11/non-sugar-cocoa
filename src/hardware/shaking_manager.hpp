@@ -28,8 +28,6 @@ protected:
 
   MPU9250 IMU; // 9 axis Sensor
 
-  const float threshold_swing_angle_axis =
-      200;       // 1カウントと見なす，角速度の大きさ(正の値)
   int count = 0; //現在のカウント数
   const int sampling_period = 100;                 //[ms]
   ShakingState shaking_state = ShakingState::Stop; //カウント計測の状態
