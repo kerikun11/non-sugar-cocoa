@@ -15,7 +15,6 @@
 #include "../hardware/button_manager.h"
 #include "../hardware/hardware.h"
 #include "scene.hpp"
-#include "scene_clock.hpp"
 
 using hardware::ButtonEvent;
 
@@ -33,13 +32,15 @@ private:
 public:
   /// シーン管理機構を初期化。
   void initialize(const std::shared_ptr<hardware::Hardware> &hardware,
-                  QueueHandle_t event_receiver) {
+                  QueueHandle_t event_receiver,
+                  std::unique_ptr<Scene> initial_scene) {
     // ハードウェア管理機構を記憶する。
     m_hardware = hardware;
     // 外部イベント受信キューを記憶する。
     m_eventReceiver = event_receiver;
-    // 初期状態は時刻表示。
-    m_scenes.push_back(std::unique_ptr<SceneClock>(new SceneClock(m_hardware)));
+    // 初期シーンを追加
+    m_scenes.push_back(std::move(initial_scene));
+    // 初期シーンを始動
     updateStack(m_scenes.back()->activated());
   }
 
@@ -95,8 +96,12 @@ protected:
       m_scenes.push_back(std::move(scene));
       updateStack(m_scenes.back()->activated());
     } break;
-    case EventResultKind::ReplaceScene:
-      break;
+    case EventResultKind::ReplaceScene: {
+      std::unique_ptr<Scene> scene(static_cast<Scene *>(result.data));
+      m_scenes.pop_back();
+      m_scenes.push_back(std::move(scene));
+      updateStack(m_scenes.back()->activated());
+    } break;
     }
   }
 };
