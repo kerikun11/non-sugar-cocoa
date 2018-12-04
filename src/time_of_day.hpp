@@ -92,10 +92,6 @@ public:
            1000;
   }
 
-  bool operator==(const TimeOfDay &rhs) const {
-    return timeSinceMidnight() == rhs.timeSinceMidnight();
-  }
-
   template <typename Rep, typename Period>
   TimeOfDay operator+(const std::chrono::duration<Rep, Period> &rhs) {
     return TimeOfDay(m_timeSinceMidnight + rhs);
@@ -116,6 +112,26 @@ public:
   TimeOfDay &operator-=(const std::chrono::duration<Rep, Period> &rhs) {
     *this = *this - rhs;
     return *this;
+  }
+
+  bool operator==(const TimeOfDay &rhs) const {
+    return timeSinceMidnight() == rhs.timeSinceMidnight();
+  }
+
+  bool operator<(const TimeOfDay &rhs) {
+    return timeSinceMidnight() < rhs.timeSinceMidnight();
+  }
+
+  bool operator<=(const TimeOfDay &rhs) {
+    return timeSinceMidnight() <= rhs.timeSinceMidnight();
+  }
+
+  bool operator>(const TimeOfDay &rhs) {
+    return timeSinceMidnight() > rhs.timeSinceMidnight();
+  }
+
+  bool operator>=(const TimeOfDay &rhs) {
+    return timeSinceMidnight() >= rhs.timeSinceMidnight();
   }
 };
 } // namespace sugar
