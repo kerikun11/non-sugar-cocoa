@@ -17,7 +17,7 @@ public:
   void begin() {
     // FreeRTOS により task() をバックグラウンドで実行
     const uint16_t stackSize = 4096;
-    UBaseType_t uxPriority = 1;
+    UBaseType_t uxPriority = 10;
     xTaskCreate(
         [](void *this_obj) { static_cast<ShakingManager *>(this_obj)->task(); },
         "ShakingManager", stackSize, this, uxPriority, NULL);
@@ -42,10 +42,9 @@ protected:
     // handleEvent の定期実行
     portTickType xLastWakeTime = xTaskGetTickCount();
     while (1) {
-      vTaskDelayUntil(&xLastWakeTime, sampling_period / portTICK_RATE_MS);
-
       updateMeasurement();
       updateCount();
+      vTaskDelayUntil(&xLastWakeTime, sampling_period / portTICK_RATE_MS);
     }
     vTaskDelete(NULL);
   }

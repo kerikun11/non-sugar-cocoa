@@ -29,8 +29,6 @@ public:
   void begin() {
     // M5Stack includes LCD, SD, M5.Btn, M5.Speaker,...
     M5.begin();
-    //時計合わせ
-    ntpInit();
     // Speaker
     m_speaker.begin();
     // Button
@@ -48,10 +46,6 @@ public:
   void onButtonEvent(ButtonManager::EventCallback callback) {
     m_button.onEvent(callback);
   }
-  /// WiFi接続(ブロッキング)
-  void connectWiFi() const;
-  /// WiFi切断
-  void disconnectWiFi() const;
   /// Button manager.
   ButtonManager &button() { return m_button; }
   /// Speaker manager.
@@ -62,8 +56,6 @@ public:
   ShakingManager &shaking() { return m_shaking; }
 
 private:
-  /// 時計合わせ(ブロッキング)
-  void ntpInit() const;
 };
 
 }; // namespace hardware

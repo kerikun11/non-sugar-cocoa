@@ -11,7 +11,7 @@ void ShakingManager::updateMeasurement() {
   if (!initialized) {
     initialized = true;
     Wire.begin();
-    // IMU.calibrateMPU9250(IMU.gyroBias, IMU.accelBias);
+    IMU.calibrateMPU9250(IMU.gyroBias, IMU.accelBias);
     IMU.initMPU9250();
     IMU.initAK8963(IMU.magCalibration);
   }
@@ -57,9 +57,6 @@ void ShakingManager::updateMeasurement() {
     IMU.mz = (float)IMU.magCount[2] * IMU.mRes * IMU.magCalibration[2] -
              IMU.magbias[2];
   }
-
-  // Must be called before updating quaternions!
-  IMU.updateTime();
 }
 
 void ShakingManager::updateCount() {
