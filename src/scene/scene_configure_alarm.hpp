@@ -11,6 +11,15 @@
 #include "../hardware/hardware.h"
 #include "scene.hpp"
 
+// コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#include <chrono>
+
 namespace scene {
 
 /// Scene を継承する
@@ -23,10 +32,12 @@ public:
     log_i("SceneSetAlarm activated()");
     // LCDのクリア
     M5.Lcd.clear();
-    //実際には、すでに記録されている時刻通りに初期化する
-    m_hour = 0;
-    m_min = 0;
-    m_sec = 0;
+    // 現在時刻で初期化
+    auto now = std::chrono::system_clock::now().time_since_epoch() +
+               std::chrono::hours(9); //< 日本時間: +9h
+    m_hour = std::chrono::duration_cast<std::chrono::hours>(now).count() % 24;
+    m_min = std::chrono::duration_cast<std::chrono::minutes>(now).count() % 60;
+    m_sec = std::chrono::duration_cast<std::chrono::seconds>(now).count() % 60;
     //その他の初期化
     m_process = 0;
     // ごみを消去
@@ -37,23 +48,26 @@ public:
   /// 定期的に (タイマーイベントごとに) 呼ばれる。
   virtual EventResult tick() override {
     // TODO: 時刻が変わったときだけ更新
-    updateDisplayClock();
+    updateDisplay();
     return EventResultKind::Continue;
   }
 
   virtual EventResult buttonAPressed() override {
-    proceedProcess();
-    updateDisplayClock();
+    decrement();
+    updateDisplay();
     return EventResultKind::Continue;
   }
   virtual EventResult buttonBPressed() override {
-    increment();
-    updateDisplayClock();
-    return EventResultKind::Continue;
+    proceedProcess();
+    updateDisplay();
+    // TODO: アラーム設定完了の処理
+    if (m_process == 0)
+      return EventResultKind::Finish;
   }
   virtual EventResult buttonCPressed() override {
-    // TODO: アラーム設定完了の処理
-    return EventResultKind::Finish;
+    increment();
+    updateDisplay();
+    return EventResultKind::Continue;
   }
 
 private:
@@ -63,8 +77,6 @@ private:
   void proceedProcess() {
     //編集箇所を次に進める
     m_process = (m_process + 1) % 3;
-    //ディスプレイの更新
-    updateDisplayClock();
   }
 
   void increment() {
@@ -95,6 +107,36 @@ private:
       break;
     }
   }
+
+  // 画面を更新する
+  void updateDisplay() const {
+    // ボタン上のUIの描画
+    const int32_t rectY = 212;
+    const int32_t width = 20;
+    const int32_t height = 6;
+    const int32_t leftX = 56;
+    const int32_t rightX = 245;
+    // 一番左は"-"を描画（長方形の描画を用いる）
+    M5.Lcd.setTextColor(TFT_PINK, TFT_BLACK);
+    // M5.Lcd.drawChar('-',53,200,6);//<
+    // これは正しく表示されるが、なんとなく見づらい
+    M5.Lcd.fillRect(leftX, rectY, width, height, TFT_PINK);
+    // 中央は"->"を右方向にアニメーションして描画
+    M5.Lcd.setTextColor(TFT_PINK, TFT_BLACK);
+    M5.Lcd.drawString("NEXT", 130, 205, 4);
+    // 一番右は"+"を描画（長方形の描画を用いる）
+    M5.Lcd.setTextColor(TFT_PINK, TFT_BLACK);
+    // M5.Lcd.drawChar('+',250,200,6);//<
+    // サイズ6だと+が表示されない、意味わからん……
+    M5.Lcd.fillRect(rightX, rectY, width, height, TFT_PINK);
+    M5.Lcd.fillRect(rightX + (width - height) / 2, rectY + (height - width) / 2,
+                    height, width, TFT_PINK);
+
+    // 時刻部分の更新
+    updateDisplayClock();
+  }
+
+  // 画面のうち時刻部分を更新する
   void updateDisplayClock() const {
     //描画準備
     //文字色設定
