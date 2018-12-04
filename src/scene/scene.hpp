@@ -105,8 +105,8 @@ public:
   virtual EventResult buttonCRepeated() { return buttonCPressed(); }
 
   /// アラーム時刻になったとき呼ばれる。
-  // TODO: `SceneAlarming` をアクティブにするために scene が明示的な
-  // `EventResult` を返すのか、 `SceneManager` が勝手によろしくやるのか。
+  // アラーム画面を強制的に有効化するのは、各シーンでなくマネージャの
+  // 責任とする。
   virtual EventResult alarm() { return EventResultKind::Continue; }
 };
 } // namespace scene

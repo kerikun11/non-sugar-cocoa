@@ -49,39 +49,7 @@ public:
   /// この関数を呼び出した時点でキューに溜まっていたイベントが処理される。
   ///
   /// 処理されたイベントの個数を返す。
-  size_t processExternalEvents() {
-    size_t num_msgs = uxQueueMessagesWaiting(m_eventReceiver);
-    if (num_msgs > 0) {
-      log_d("SceneManager::processExternalEvent: %zd events to be processed",
-            num_msgs);
-    }
-    for (size_t i = 0; i < num_msgs; ++i) {
-      Event *qi;
-      // This will not block so long, because there should be at least one
-      // message rest.
-      xQueueReceive(m_eventReceiver, &qi, portMAX_DELAY);
-      // The item should be created by `new Event(foobar)`,
-      // so that it can be safely `delete`d.
-      auto ev = std::unique_ptr<Event>{qi};
-
-      // Pass the event to the top (currently active) scene.
-      auto &currentScene = *m_scenes.back();
-      switch (ev->kind()) {
-      case EventKind::Tick:
-        updateStack(currentScene.tick());
-        break;
-      case EventKind::Button: {
-        auto bte = ev->buttonData();
-        updateStack(currentScene.buttonEventReceived(bte->button, bte->kind));
-      } break;
-      case EventKind::Alarm:
-        updateStack(currentScene.alarm());
-        break;
-      }
-    }
-
-    return num_msgs;
-  }
+  size_t processExternalEvents();
 
 protected:
   /// シーンのイベント処理結果を受けてスタックを更新する。
