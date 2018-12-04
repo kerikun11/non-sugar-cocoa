@@ -96,8 +96,12 @@ protected:
       m_scenes.push_back(std::move(scene));
       updateStack(m_scenes.back()->activated());
     } break;
-    case EventResultKind::ReplaceScene:
-      break;
+    case EventResultKind::ReplaceScene: {
+      std::unique_ptr<Scene> scene(static_cast<Scene *>(result.data));
+      m_scenes.pop_back();
+      m_scenes.push_back(std::move(scene));
+      updateStack(m_scenes.back()->activated());
+    } break;
     }
   }
 };
