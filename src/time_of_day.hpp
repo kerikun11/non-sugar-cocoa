@@ -92,6 +92,22 @@ public:
            1000;
   }
 
+  /// 特定の時刻であるか、或いはそれを過ぎて一定時間以内であるかどうかを返す。
+  ///
+  /// `target` の時刻ちょうどであるか、それ以降 `futureDuration`
+  /// 以内の時間であれば `true` を返す。
+  ///
+  /// `futureDuration` はその名の通り未来方向への範囲であり、 `target` よりも
+  /// 前の時間について指定するものではない。
+  template <typename Rep, typename Period>
+  bool isAfter(TimeOfDay target,
+               std::chrono::duration<Rep, Period> futureDuration) {
+    auto diff = (timeSinceMidnight() + std::chrono::hours(24) -
+                 target.timeSinceMidnight()) %
+                std::chrono::hours(24);
+    return (diff.count() >= 0 && diff <= futureDuration);
+  }
+
   template <typename Rep, typename Period>
   TimeOfDay operator+(const std::chrono::duration<Rep, Period> &rhs) {
     return TimeOfDay(m_timeSinceMidnight + rhs);
