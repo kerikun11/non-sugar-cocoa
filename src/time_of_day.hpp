@@ -95,6 +95,28 @@ public:
   bool operator==(const TimeOfDay &rhs) const {
     return timeSinceMidnight() == rhs.timeSinceMidnight();
   }
+
+  template <typename Rep, typename Period>
+  TimeOfDay operator+(const std::chrono::duration<Rep, Period> &rhs) {
+    return TimeOfDay(m_timeSinceMidnight + rhs);
+  }
+
+  template <typename Rep, typename Period>
+  TimeOfDay &operator+=(const std::chrono::duration<Rep, Period> &rhs) {
+    *this = *this + rhs;
+    return *this;
+  }
+
+  template <typename Rep, typename Period>
+  TimeOfDay operator-(const std::chrono::duration<Rep, Period> &rhs) {
+    return TimeOfDay(m_timeSinceMidnight - rhs);
+  }
+
+  template <typename Rep, typename Period>
+  TimeOfDay &operator-=(const std::chrono::duration<Rep, Period> &rhs) {
+    *this = *this - rhs;
+    return *this;
+  }
 };
 } // namespace sugar
 #endif
