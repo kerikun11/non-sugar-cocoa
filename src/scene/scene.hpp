@@ -103,6 +103,11 @@ public:
 
   /// ボタンCが長押しされたとき、定期的に呼ばれる。
   virtual EventResult buttonCRepeated() { return buttonCPressed(); }
+
+  /// アラーム時刻になったとき呼ばれる。
+  // TODO: `SceneAlarming` をアクティブにするために scene が明示的な
+  // `EventResult` を返すのか、 `SceneManager` が勝手によろしくやるのか。
+  virtual EventResult alarm() { return EventResultKind::Continue; }
 };
 } // namespace scene
 

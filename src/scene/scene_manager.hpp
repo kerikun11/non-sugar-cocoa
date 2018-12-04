@@ -74,6 +74,9 @@ public:
         auto bte = ev->buttonData();
         updateStack(currentScene.buttonEventReceived(bte->button, bte->kind));
       } break;
+      case EventKind::Alarm:
+        updateStack(currentScene.alarm());
+        break;
       }
     }
 
@@ -131,6 +134,12 @@ public:
   void button(ButtonEvent bte) {
     auto ev = std::make_unique<Event>(
         EventKind::Button, std::make_unique<ButtonEvent>(bte).release());
+    send(std::move(ev));
+  }
+
+  /// Alarm イベントを送信する。
+  void alarm() {
+    auto ev = std::make_unique<Event>(EventKind::Alarm);
     send(std::move(ev));
   }
 };

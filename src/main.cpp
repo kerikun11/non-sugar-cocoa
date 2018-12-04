@@ -42,6 +42,7 @@ void setup() {
   hw->onButtonEvent([=](hardware::Button bt, hardware::ButtonEventKind btk) {
     sceneEventSender.button(ButtonEvent{bt, btk});
   });
+  hw->onAlarmEvent([=]() { sceneEventSender.alarm(); });
 }
 
 void loop() {
