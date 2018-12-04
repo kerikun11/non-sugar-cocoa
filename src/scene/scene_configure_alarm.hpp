@@ -37,18 +37,18 @@ public:
   /// 定期的に (タイマーイベントごとに) 呼ばれる。
   virtual EventResult tick() override {
     // TODO: 時刻が変わったときだけ更新
-    updateDisplayClock();
+    updateDisplay();
     return EventResultKind::Continue;
   }
 
   virtual EventResult buttonAPressed() override {
     proceedProcess();
-    updateDisplayClock();
+    updateDisplay();
     return EventResultKind::Continue;
   }
   virtual EventResult buttonBPressed() override {
     increment();
-    updateDisplayClock();
+    updateDisplay();
     return EventResultKind::Continue;
   }
   virtual EventResult buttonCPressed() override {
@@ -64,7 +64,7 @@ private:
     //編集箇所を次に進める
     m_process = (m_process + 1) % 3;
     //ディスプレイの更新
-    updateDisplayClock();
+    updateDisplay();
   }
 
   void increment() {
@@ -95,6 +95,33 @@ private:
       break;
     }
   }
+
+  // 画面を更新する
+  void updateDisplay()const{
+    // ボタン上のUIの描画
+    const int32_t rectY=212;
+    const int32_t width=20;
+    const int32_t height=6;
+    const int32_t leftX=56;
+    const int32_t rightX=245;
+    // 一番左は"-"を描画（長方形の描画を用いる） 
+    M5.Lcd.setTextColor(TFT_PINK, TFT_BLACK);
+    //M5.Lcd.drawChar('-',53,200,6);//< これは正しく表示されるが、なんとなく見づらい
+    M5.Lcd.fillRect(leftX,rectY,width,height,TFT_PINK);
+    // 中央は"->"を右方向にアニメーションして描画
+    M5.Lcd.setTextColor(TFT_PINK, TFT_BLACK);
+    M5.Lcd.drawString("NEXT",130,205,4);
+    // 一番右は"+"を描画（長方形の描画を用いる）
+    M5.Lcd.setTextColor(TFT_PINK, TFT_BLACK);
+    //M5.Lcd.drawChar('+',250,200,6);//< サイズ6だと+が表示されない、意味わからん……
+    M5.Lcd.fillRect(rightX,rectY,width,height,TFT_PINK);
+    M5.Lcd.fillRect(rightX+(width-height)/2,rectY+(height-width)/2,height,width,TFT_PINK);
+
+    // 時刻部分の更新
+    updateDisplayClock();
+  }
+
+  // 画面のうち時刻部分を更新する
   void updateDisplayClock() const {
     //描画準備
     //文字色設定
