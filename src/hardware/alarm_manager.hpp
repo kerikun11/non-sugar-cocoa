@@ -107,12 +107,15 @@ private:
         }
       }
 
-      // アラームが設定されていれば、時刻を確認
-      if (isAlarmSet()) {
+      // アラームとコールバックがともに設定されていれば、時刻を確認
+      if (isAlarmSet() && eventCallback) {
         auto current =
             sugar::TimeOfDay::fromUtcToJst(std::chrono::system_clock::now());
-        if (current == m_alarmTime && eventCallback) {
+        // 設定された時間以降 990 ミリ秒以内であればイベント発火
+        if (current.isAfter(m_alarmTime, std::chrono::milliseconds(990))) {
           eventCallback();
+          // Unset alarm.
+          m_alarmIsSet = false;
         }
       }
     }
