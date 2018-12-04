@@ -104,12 +104,13 @@ protected:
     // 明るく描画するか
     static bool lightColon = true; // 500msごとに切り替える
 
+    //文字色設定
+    M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
     //描画準備
     if (clean) {
       M5.Lcd.clear();
+      M5.Lcd.drawCentreString("Alarm Clock", 160, 0, 8);
     }
-    //文字色設定
-    M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
     //描画位置
     int xpos = 0;
     int ypos = 85; // Top left corner ot clock text, about half way down
