@@ -77,15 +77,13 @@ private:
     //文字色設定
     M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
     //描画位置
-    int xpos = 0;
+    int xpos = 160;
     int ypos = 85 - 24; // Top left corner ot clock text, about half way down
 
     //描画処理
-    //毎分の時間・分の描画（分が変更していれば、時間は変わっていなくても時間を描画しなおす）
-    xpos += M5.Lcd.drawString("Shake!", xpos, ypos, 0); // Draw hours
-    xpos = 0;
-    ypos += 24;
-    xpos += M5.Lcd.drawNumber(remain_count, xpos, ypos, 8); // Draw hours
+    M5.Lcd.drawCentreString("Shake to Stop!", xpos, ypos, 5); // Draw hours
+    ypos += 48;
+    M5.Lcd.drawCentreString(String(remain_count, DEC), xpos, ypos, 8);
   }
 };
 

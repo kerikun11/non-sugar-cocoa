@@ -62,7 +62,9 @@ void ShakingManager::updateMeasurement() {
 void ShakingManager::updateCount() {
 
   //とりあえずx方向の角速度のみを使って検知
-  auto swing_angle_velocity = IMU.gx;
+  auto swing_angle_velocity = IMU.ay;
+  // 1カウントと見なす，角速度の大きさ(正の値)
+  const float threshold_swing_angle_axis = 1.6;
 
   switch (shaking_state) {
 
