@@ -14,9 +14,8 @@
 #include <freertos/queue.h>
 #include <freertos/task.h>
 
-#include <AudioFileSourceID3.h>
 #include <AudioFileSourceSD.h>
-#include <AudioGeneratorMP3.h>
+#include <AudioGeneratorWAV.h>
 #include <AudioOutputI2S.h>
 #include <HTTPClient.h> //< 依存関係コンパイルエラーを防止
 
@@ -67,10 +66,10 @@ private:
   // FreeRTOS によって実行される関数
   void task() {
     while (1) {
-      if (mp3 && mp3->isRunning()) {
+      if (wav && wav->isRunning()) {
         // 以下の関数しばしばフリーズ
-        if (!mp3->loop()) {
-          id3->seek(0, SEEK_SET);
+        if (!wav->loop()) {
+          file->seek(0, SEEK_SET);
         }
       }
       QueueItem *qi;
@@ -81,42 +80,40 @@ private:
       case Event::Play:
         log_d("Play");
         // M5.Speaker.beep();
-        mp3_start();
+        wav_start();
         break;
       case Event::Stop:
         log_d("Stop");
         // M5.Speaker.mute();
-        mp3_stop();
+        wav_stop();
         break;
       }
     }
   }
 
 public:
-  std::unique_ptr<AudioGeneratorMP3> mp3;
+  std::unique_ptr<AudioGeneratorWAV> wav;
   std::unique_ptr<AudioFileSourceSD> file;
   std::unique_ptr<AudioOutputI2S> out;
-  std::unique_ptr<AudioFileSourceID3> id3;
 
-  void mp3_start() {
+  void wav_start() {
     // static bool initialized = false;
     // if (!initialized) {
     //   initialized = true;
-    file = std::make_unique<AudioFileSourceSD>("/bachfugue.mp3");
-    id3 = std::make_unique<AudioFileSourceID3>(file.get());
+    file = std::make_unique<AudioFileSourceSD>("/harpsi-cs.wav");
     out = std::make_unique<AudioOutputI2S>(0, 1);
-    mp3 = std::make_unique<AudioGeneratorMP3>();
+    wav = std::make_unique<AudioGeneratorWAV>();
     // }
     out->SetOutputModeMono(true);
     out->SetGain(0.1);
-    mp3->begin(id3.get(), out.get());
+    wav->begin(file.get(), out.get());
   }
-  void mp3_stop() {
-    mp3->stop();
+  void wav_stop() {
+    wav->stop();
+    out->stop();
     file.reset();
-    id3.reset();
     out.reset();
-    mp3.reset();
+    wav.reset();
   }
 };
 
