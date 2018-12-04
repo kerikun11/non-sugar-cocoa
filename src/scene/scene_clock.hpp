@@ -52,7 +52,8 @@ public:
   virtual EventResult buttonAPressed() override {
     /// アラーム設定へ
     return EventResult(EventResultKind::PushScene,
-                       static_cast<void *>(new SceneConfigureAlarm()));
+                       static_cast<void *>(new SceneConfigureAlarm(
+                           m_hardware->alarm().alarmTimeSetter())));
   }
 
   /// ボタン

@@ -8,7 +8,9 @@
 
 #pragma once
 
+#include "../hardware/alarm_manager.hpp"
 #include "../hardware/hardware.h"
+#include "../time_of_day.hpp"
 #include "scene.hpp"
 
 // コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
@@ -24,8 +26,27 @@ namespace scene {
 
 /// Scene を継承する
 class SceneConfigureAlarm : public Scene {
+private:
+  /// カーソル位置。
+  enum class Cursor : int {
+    /// 時
+    Hour = 0,
+    /// 分
+    Minute = 1,
+    /// 秒
+    Second = 2,
+  };
+
+  /// アラーム時刻。
+  sugar::TimeOfDay m_alarmTime;
+  /// カーソル位置。
+  Cursor m_cursor;
+  /// 時刻設定機構。
+  hardware::AlarmTimeSetter m_alarmTimeSetter;
+
 public:
-  SceneConfigureAlarm() {}
+  SceneConfigureAlarm(hardware::AlarmTimeSetter timeSetter)
+      : m_alarmTime{}, m_cursor{Cursor::Hour}, m_alarmTimeSetter{timeSetter} {}
 
   /// シーンがスタックのトップに来たとき呼ばれる。
   virtual EventResult activated() override {
@@ -33,13 +54,10 @@ public:
     // LCDのクリア
     M5.Lcd.clear();
     // 現在時刻で初期化
-    auto now = std::chrono::system_clock::now().time_since_epoch() +
-               std::chrono::hours(9); //< 日本時間: +9h
-    m_hour = std::chrono::duration_cast<std::chrono::hours>(now).count() % 24;
-    m_min = std::chrono::duration_cast<std::chrono::minutes>(now).count() % 60;
-    m_sec = std::chrono::duration_cast<std::chrono::seconds>(now).count() % 60;
+    m_alarmTime =
+        sugar::TimeOfDay::fromUtcToJst(std::chrono::system_clock::now());
     //その他の初期化
-    m_process = 0;
+    m_cursor = Cursor::Hour;
     // ごみを消去
     M5.Lcd.clear();
     return EventResultKind::Continue;
@@ -58,11 +76,19 @@ public:
     return EventResultKind::Continue;
   }
   virtual EventResult buttonBPressed() override {
-    proceedProcess();
-    updateDisplay();
-    // TODO: アラーム設定完了の処理
-    if (m_process == 0)
+    // カーソルを進める
+    moveCursorNext();
+    // カーソルを次の桁に移動後に「時」の位置にあるなら、
+    // カーソル位置が一周したということなので時刻設定を完了する
+    if (m_cursor == Cursor::Hour) {
+      // 設定した時間を送信する。
+      m_alarmTimeSetter.setAlarmTime(m_alarmTime);
       return EventResultKind::Finish;
+    }
+    // 時間設定を続行するので画面を更新する
+    updateDisplay();
+
+    return EventResultKind::Continue;
   }
   virtual EventResult buttonCPressed() override {
     increment();
@@ -71,39 +97,36 @@ public:
   }
 
 private:
-  uint8_t m_hour, m_min, m_sec; //時刻
-  int m_process; //編集する場所。この書き方は汚い。(0:時間 1:分 2:秒)
-
-  void proceedProcess() {
-    //編集箇所を次に進める
-    m_process = (m_process + 1) % 3;
+  void moveCursorNext() {
+    // 編集箇所を次に進める
+    m_cursor = static_cast<Cursor>((static_cast<int>(m_cursor) + 1) % 3);
   }
 
   void increment() {
-    //数値をインクリメント
-    switch (m_process) {
-    case (0):
-      m_hour = (m_hour + 1) % 24;
+    // カーソル位置の桁をインクリメント
+    switch (m_cursor) {
+    case Cursor::Hour:
+      m_alarmTime += std::chrono::hours(1);
       break;
-    case (1):
-      m_min = (m_min + 1) % 60;
+    case Cursor::Minute:
+      m_alarmTime += std::chrono::minutes(1);
       break;
-    case (2):
-      m_sec = (m_sec + 1) % 60;
+    case Cursor::Second:
+      m_alarmTime += std::chrono::seconds(1);
       break;
     }
   }
   void decrement() {
     //数値をデクリメント
-    switch (m_process) {
-    case (0):
-      m_hour = (m_hour + 23) % 24;
+    switch (m_cursor) {
+    case Cursor::Hour:
+      m_alarmTime -= std::chrono::hours(1);
       break;
-    case (1):
-      m_min = (m_min + 59) % 60;
+    case Cursor::Minute:
+      m_alarmTime -= std::chrono::minutes(1);
       break;
-    case (2):
-      m_sec = (m_sec + 59) % 60;
+    case Cursor::Second:
+      m_alarmTime -= std::chrono::seconds(1);
       break;
     }
   }
@@ -148,15 +171,15 @@ private:
 
     //描画処理
     //時間の描画、0でいいので2桁目を描画する
-    xpos += drawNumber2Char(m_hour, xpos, ypos, 8);
+    xpos += drawNumber2Char(m_alarmTime.hour(), xpos, ypos, 8);
     //時間と分の間の":"の描画
     xpos += M5.Lcd.drawChar(':', xpos, ypos - 8, 8);
     //分の描画、0でいいので2桁目を描画する
-    xpos += drawNumber2Char(m_min, xpos, ypos, 8);
+    xpos += drawNumber2Char(m_alarmTime.minute(), xpos, ypos, 8);
     //分と秒の間の":"の描画
     xpos += M5.Lcd.drawChar(':', xpos, ysecs, 6);
     //秒の描画、0でいいので2桁目を描画する
-    xpos += drawNumber2Char(m_sec, xpos, ysecs, 6);
+    xpos += drawNumber2Char(m_alarmTime.second(), xpos, ysecs, 6);
   }
   int drawNumber2Char(uint8_t pal, int x, int y, int font) const {
     // 2文字で数字の描画(1桁は先頭に0をつけて描画する)
