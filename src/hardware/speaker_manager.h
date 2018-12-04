@@ -34,8 +34,6 @@ public:
     qi->e = Event::Stop;
     xQueueSendToBack(eventQueue, &qi, 0);
   }
-
-protected:
   void begin() {
     // キューを初期化
     const int uxQueueLength = 10;
@@ -69,7 +67,7 @@ private:
       switch (item->e) {
       case Event::Play:
         log_d("Play");
-        M5.Speaker.beep();
+        // M5.Speaker.beep();
         break;
       case Event::Stop:
         log_d("Stop");

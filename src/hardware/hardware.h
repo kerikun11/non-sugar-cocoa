@@ -9,8 +9,8 @@
 
 #include <M5Stack.h>
 
-#include "shaking_manager.hpp"
 #include "button_manager.h"
+#include "shaking_manager.hpp"
 #include "speaker_manager.h"
 #include "ticker.h"
 
@@ -18,41 +18,48 @@
 
 namespace hardware {
 
-class Hardware : public ButtonManager,
-                 public SpeakerManager,
-                 public Ticker,
-                 public ShakingManager {
+class Hardware {
+private:
+  ButtonManager m_button;
+  SpeakerManager m_speaker;
+  Ticker m_ticker;
+  ShakingManager m_shaking;
 
 public:
-  Hardware() {}
   void begin() {
     // M5Stack includes LCD, SD, M5.Btn, M5.Speaker,...
     M5.begin();
     //時計合わせ
     ntpInit();
     // Speaker
-    SpeakerManager::begin();
+    m_speaker.begin();
     // Button
-    ButtonManager::begin();
-
+    m_button.begin();
     // Shaking
     // IMUの初期化とWireの初期化．振動検知タスクの開始
-    ShakingManager::begin();
-
+    m_shaking.begin();
     // Ticker
-    Ticker::begin();
+    m_ticker.begin();
   }
   /// Tickerイベントを割り当てする
   void onTickEvent(Ticker::EventCallback callback) {
-    Ticker::onEvent(callback);
+    m_ticker.onEvent(callback);
   }
   void onButtonEvent(ButtonManager::EventCallback callback) {
-    ButtonManager::onEvent(callback);
+    m_button.onEvent(callback);
   }
   /// WiFi接続(ブロッキング)
   void connectWiFi() const;
   /// WiFi切断
   void disconnectWiFi() const;
+  /// Button manager.
+  ButtonManager &button() { return m_button; }
+  /// Speaker manager.
+  SpeakerManager &speaker() { return m_speaker; }
+  /// Ticker.
+  Ticker &ticker() { return m_ticker; }
+  /// Shaking manager.
+  ShakingManager &shaking() { return m_shaking; }
 
 private:
   /// 時計合わせ(ブロッキング)
