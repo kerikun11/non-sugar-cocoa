@@ -37,14 +37,14 @@ public:
   TimeOfDay(std::chrono::time_point<Clock, Duration> time)
       : m_timeSinceMidnight(
             std::chrono::duration_cast<decltype(m_timeSinceMidnight)>(
-                time.time_since_epoch() % std::chrono::hours(24))) {}
+                modulo24h(time.time_since_epoch()))) {}
 
   /// タイムゾーンを考慮しない素朴な初期化。
   template <typename Rep, typename Period>
   TimeOfDay(std::chrono::duration<Rep, Period> time)
       : m_timeSinceMidnight(
             std::chrono::duration_cast<decltype(m_timeSinceMidnight)>(
-                time % std::chrono::hours(24))) {}
+                modulo24h(time))) {}
 
   /// 協定世界時を受け取り、日本標準時で `TimeOfDay` を作成する。
   template <typename Clock, typename Duration>
@@ -148,6 +148,25 @@ public:
 
   bool operator>=(const TimeOfDay &rhs) {
     return timeSinceMidnight() >= rhs.timeSinceMidnight();
+  }
+
+private:
+  template <typename Rep, typename Period>
+  static std::chrono::duration<Rep, Period>
+  durationAbs(const std::chrono::duration<Rep, Period> &d) {
+    return d >= d.zero() ? d : -d;
+  }
+
+  template <typename Rep, typename Period>
+  static std::chrono::duration<Rep, Period>
+  modulo24h(const std::chrono::duration<Rep, Period> &d) {
+    constexpr auto DAY = std::chrono::hours(24);
+    if (d >= std::chrono::duration<Rep, Period>::zero()) {
+      return d % DAY;
+    } else {
+      auto backward = durationAbs(d) % DAY;
+      return (DAY - backward) % DAY;
+    }
   }
 };
 } // namespace sugar
