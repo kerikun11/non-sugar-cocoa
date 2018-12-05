@@ -154,9 +154,46 @@ private:
     M5.Lcd.fillRect(rightX, rectY, width, height, TFT_PINK);
     M5.Lcd.fillRect(rightX + (width - height) / 2, rectY + (height - width) / 2,
                     height, width, TFT_PINK);
+    // 今指し示しているものがわかるように、数字の上下に三角形の描画
+    static Cursor beforeCursor=Cursor::Second;
+    if(beforeCursor!=m_cursor){
+      // 前フレームで描画していた三角形の描画削除
+      DrawProcessTriangle(beforeCursor,TFT_BLACK);
+      // 今フレームで描画する三角形の描画
+      DrawProcessTriangle(m_cursor,TFT_YELLOW);
+      beforeCursor=m_cursor;
+    }
 
     // 時刻部分の更新
     updateDisplayClock();
+  }
+
+  // 現在設定している部分の描画
+  void DrawProcessTriangle(Cursor cursor,uint16_t color)const{
+    // 描画位置の決定
+    int x=-100,y1=-100,y2=-100;
+    const int v1x=5,v1y=7;
+    const int v2x=10,v2y=0;
+    switch(cursor){
+    case (Cursor::Hour):
+      x=51;
+      y1=75;
+      y2=175;
+      break;
+    case (Cursor::Minute):
+      x=187;
+      y1=75;
+      y2=175;
+      break;
+    case (Cursor::Second):
+      x=285;
+      y1=100;
+      y2=155;
+      break;
+    }
+    //描画
+    M5.Lcd.fillTriangle(x,y1,x+v1x,y1-v1y,x+v2x,y1-v2y,color);
+    M5.Lcd.fillTriangle(x,y2,x+v1x,y2+v1y,x+v2x,y2+v2y,color);
   }
 
   // 画面のうち時刻部分を更新する
