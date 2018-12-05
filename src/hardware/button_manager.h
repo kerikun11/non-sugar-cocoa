@@ -24,15 +24,13 @@ public:
     static const char *names[] = {"A", "B", "C"};
     return names[static_cast<size_t>(k)];
   }
-  /// ボタンの押され方
-  enum class EventKind { Pressed, Released };
   /// ボタンの押され方の表示用
-  static const char *c_str(EventKind e) {
+  static const char *c_str(ButtonEventKind e) {
     static const char *names[] = {"Pressed", "Released"};
     return names[static_cast<size_t>(e)];
   }
   /// ボタンイベントのコールバック関数型
-  typedef std::function<void(Button, EventKind)> EventCallback;
+  typedef std::function<void(Button, ButtonEventKind)> EventCallback;
 
   bool isPressed(Button button) {
     switch (button) {
@@ -44,8 +42,6 @@ public:
       return M5.BtnC.isPressed();
     }
   }
-
-protected:
   // イベントコールバックの登録
   void onEvent(EventCallback eventCallback = nullptr) {
     this->eventCallback = eventCallback;
@@ -87,17 +83,17 @@ private:
       return;
     // イベントの確認 & コールバック関数の実行
     if (M5.BtnA.wasPressed())
-      eventCallback(Button::A, EventKind::Pressed);
+      eventCallback(Button::A, ButtonEventKind::Pressed);
     if (M5.BtnA.wasReleased())
-      eventCallback(Button::A, EventKind::Released);
+      eventCallback(Button::A, ButtonEventKind::Released);
     if (M5.BtnB.wasPressed())
-      eventCallback(Button::B, EventKind::Pressed);
+      eventCallback(Button::B, ButtonEventKind::Pressed);
     if (M5.BtnB.wasReleased())
-      eventCallback(Button::B, EventKind::Released);
+      eventCallback(Button::B, ButtonEventKind::Released);
     if (M5.BtnC.wasPressed())
-      eventCallback(Button::C, EventKind::Pressed);
+      eventCallback(Button::C, ButtonEventKind::Pressed);
     if (M5.BtnC.wasReleased())
-      eventCallback(Button::C, EventKind::Released);
+      eventCallback(Button::C, ButtonEventKind::Released);
   }
 };
 

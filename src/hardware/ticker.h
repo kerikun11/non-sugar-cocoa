@@ -20,7 +20,6 @@ public:
   /// ボタンイベントのコールバック関数型
   typedef std::function<void()> EventCallback;
 
-protected:
   // イベントコールバックの登録
   void onEvent(EventCallback eventCallback = nullptr) {
     this->eventCallback = eventCallback;
@@ -46,7 +45,8 @@ private:
     while (1) {
       // 定期実行
       vTaskDelayUntil(&xLastWakeTime, PeriodMillis / portTICK_RATE_MS);
-      eventCallback();
+      if (eventCallback != nullptr)
+        eventCallback();
     }
   }
 };

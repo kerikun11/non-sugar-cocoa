@@ -34,8 +34,6 @@ public:
     qi->e = Event::Stop;
     xQueueSendToBack(eventQueue, &qi, 0);
   }
-
-protected:
   void begin() {
     // キューを初期化
     const int uxQueueLength = 10;
