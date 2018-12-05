@@ -2,6 +2,7 @@
 #ifndef _INCLUDE_ALARM_MANAGER_HPP_
 #define _INCLUDE_ALARM_MANAGER_HPP_
 
+#include <atomic>
 #include <utility>
 
 #include <esp32-hal-log.h>
@@ -41,7 +42,7 @@ public:
 
 private:
   /// アラームが有効化されているか否か。
-  bool m_alarmIsSet;
+  std::atomic_bool m_alarmIsSet;
   /// アラーム設定時刻。
   sugar::TimeOfDay m_alarmTime;
   /// コールバック関数。
@@ -75,9 +76,6 @@ public:
 
   /// アラームが設定されているかどうかを返す。
   bool isAlarmSet() const { return m_alarmIsSet; }
-
-  /// アラームの時刻を設定する。
-  void setAlarmTime(sugar::TimeOfDay t) { m_alarmTime = t; }
 
   /// アラーム設定用オブジェクトを返す。
   // 時刻は別スレッドから設定されることがありうるため、競合を起こさないように
