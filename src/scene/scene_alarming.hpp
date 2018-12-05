@@ -12,6 +12,15 @@
 #include "scene/scene.hpp"
 #include "stewgate_u/stewgate_u.h"
 
+// コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#include <chrono>
+
 namespace scene {
 
 // アラーム設定時刻になった後，アラーム音が鳴り続けている最中のScene
@@ -23,7 +32,7 @@ public:
 
   /// シーンがスタックのトップに来たとき呼ばれる。
   virtual EventResult activated() override {
-    log_i("SceneAlerming activated()");
+    log_i("SceneAlarming activated()");
 
     // LCDのクリア
     M5.Lcd.clear();
@@ -37,8 +46,8 @@ public:
     m_hardware->shaking().resetCount();
     m_hardware->shaking().startCount();
 
-    //アラーム鳴ってからの経過時間を0に初期化
-    passed_time_from_alarming = 0;
+    // 絶起ツイートの時間を設定
+    m_timelimit_to_stop = std::chrono::system_clock::now() + alarming_duration;
 
     return EventResultKind::Continue;
   }
@@ -55,8 +64,9 @@ public:
       m_hardware->shaking().stopCount();
       m_hardware->shaking().resetCount();
 
-      Tweeter.tweet("はいプロ\n世界一起床が上手\n起床界のtourist\n布団時代の終焉を告げる者\n実質朝\n起床するために生まれてきた男"); 
-      log_i("SceneAlerming kisyou_success Finish");
+      Tweeter.tweet("はいプロ\n世界一起床が上手\n起床界のtourist\n布団時代の終"
+                    "焉を告げる者\n実質朝\n起床するために生まれてきた男\\");
+      log_i("SceneAlarming kisyou_success Finish");
       return EventResultKind::Finish;
     }
 
@@ -64,20 +74,13 @@ public:
     updateLcd(remain_count);
 
     //アラーム制限時間処理
-    passed_time_from_alarming += 1;
-    if(passed_time_from_alarming >= max_alarming_time){
-      
+    if (std::chrono::system_clock::now() > m_timelimit_to_stop) {
+
       //起床失敗 tweet & alarm停止
       m_hardware->speaker().stop();
-      
-      m_hardware->shaking().stopCount();
-      m_hardware->shaking().resetCount();
 
-      passed_time_from_alarming = 0;
-
-      Tweeter.tweet("絶起"); 
-      log_i("SceneAlerming kisyou_failed Finish");
-
+      Tweeter.tweet("絶起");
+      log_i("SceneAlarming kisyou_failed Finish");
       return EventResultKind::Finish;
     }
 
@@ -89,9 +92,14 @@ public:
 protected:
   std::shared_ptr<hardware::Hardware> m_hardware;
 
-  const int max_count = 5; // 100回振ると，アラーム停止
-  const int max_alarming_time = 20; //アラームが鳴り続ける制限時間．これを過ぎるとぜっきTweet
-  int passed_time_from_alarming = 0;
+  // アラームを止めるために振らなければならない回数
+  const int max_count = 5;
+  //アラームが鳴り続ける最大時間．これを過ぎるとぜっきTweet
+  const std::chrono::seconds alarming_duration{10};
+
+  std::chrono::system_clock::time_point m_timelimit_to_stop =
+      std::chrono::system_clock::now();
+
 private:
   void updateLcd(int remain_count) const {
     static int prev_count = 0;
