@@ -15,6 +15,7 @@
 #undef max
 #endif
 #include <chrono>
+#include <cstdio>
 #include <string>
 
 #include "hardware/hardware.h"
@@ -43,8 +44,9 @@ public:
   virtual EventResult activated() override {
     // ごみを消去
     updateDisplayClock(true); //< 完全再描画
-    DrawAlarmTime(
-        sugar::TimeOfDay()); //< 来たときのみアラーム時刻の描画処理をする
+    if (hardware::Hardware::isAlarmEnabled()) {
+      DrawAlarmTime(hardware::Hardware::alarmTimeCache());
+    }
     log_i("SceneClock activated()");
     return EventResultKind::Continue;
   }
@@ -168,9 +170,13 @@ protected:
   }
 
   // 画面上部にアラーム時刻を描画する関数
-  void DrawAlarmTime(sugar::TimeOfDay tod) const {
-    // らりお：todを文字列化して
-    std::string str = "Alarm : 00:00:00";
+  void DrawAlarmTime(sugar::TimeOfDay time) const {
+    char buf[9] = {'\0'};
+    // C++14 なのに `std::snprintf` がない処理系は何をやっても駄目
+    std::sprintf(buf, "%02d:%02d:%02d", time.hour(), time.minute(),
+                 time.second());
+    std::string str = "Alarm : ";
+    str += buf;
     // strを描画
     M5.Lcd.drawString(str.c_str(), 10, 10, 2);
   }
