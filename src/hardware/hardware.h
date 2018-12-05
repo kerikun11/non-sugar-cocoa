@@ -7,8 +7,17 @@
  */
 #pragma once
 
-#include <M5Stack.h>
+// コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#include <memory>
+#include <utility>
 
+#include "../time_of_day.hpp"
 #include "alarm_manager.hpp"
 #include "button_manager.h"
 #include "shaking_manager.hpp"
@@ -16,7 +25,7 @@
 #include "ticker.h"
 #include "tweet_manager.h"
 
-#include <memory>
+#include <M5Stack.h>
 
 namespace hardware {
 
@@ -28,6 +37,18 @@ private:
   Ticker m_ticker;
   ShakingManager m_shaking;
   TweetManager m_tweet;
+
+public:
+  /// Thread-local alarm state cache.
+  ///
+  /// This can be accessed in thread-safe way because it is not shared among
+  /// threads.
+  thread_local static bool m_alarmIsEnabled;
+  /// Thread-local alarm time cache.
+  ///
+  /// This can be accessed in thread-safe way because it is not shared among
+  /// threads.
+  thread_local static sugar::TimeOfDay m_alarmTimeCache;
 
 public:
   void begin() {
@@ -69,6 +90,19 @@ public:
   ShakingManager &shaking() { return m_shaking; }
   /// Tweet manager.
   TweetManager &tweet() { return m_tweet; }
+
+  // Workaround for GCC-5 bug
+  // <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66971>.
+  static void setAlarmEnabled(bool v);
+  // Workaround for GCC-5 bug
+  // <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66971>.
+  static bool isAlarmEnabled();
+  // Workaround for GCC-5 bug
+  // <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66971>.
+  static void setAlarmTimeCache(sugar::TimeOfDay v);
+  // Workaround for GCC-5 bug
+  // <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66971>.
+  static const sugar::TimeOfDay &alarmTimeCache();
 
 private:
 };

@@ -2,6 +2,13 @@
 #ifndef _INCLUDE_SCENE_MANAGER_HPP_
 #define _INCLUDE_SCENE_MANAGER_HPP_
 
+// コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include <cstdlib>
 #include <stdexcept>
 #include <utility>

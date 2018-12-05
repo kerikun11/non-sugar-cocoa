@@ -2,12 +2,22 @@
 #ifndef _INCLUDE_ALARM_MANAGER_HPP_
 #define _INCLUDE_ALARM_MANAGER_HPP_
 
+// コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include <atomic>
+#include <functional>
+#include <memory>
 #include <utility>
 
 #include <esp32-hal-log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
+#include <freertos/task.h>
 
 #include "../time_of_day.hpp"
 
@@ -27,11 +37,9 @@ public:
   /// 時刻を設定する。
   ///
   /// 正しく設定コマンドが送信されたとき `true` を返す。
-  bool setAlarmTime(const sugar::TimeOfDay &time) {
-    auto obj = std::make_unique<sugar::TimeOfDay>(time);
-    sugar::TimeOfDay *ptr = obj.release();
-    return xQueueSendToBack(m_queue, &ptr, 0) == pdTRUE;
-  }
+  ///
+  /// ついでに `Hardware::alarmStateCache` も更新する。
+  bool setAlarmTime(const sugar::TimeOfDay &time);
 };
 
 /// アラームイベント発生を担当するクラス。

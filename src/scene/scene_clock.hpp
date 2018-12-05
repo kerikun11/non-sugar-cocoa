@@ -7,14 +7,6 @@
  */
 #pragma once
 
-#include <string>
-
-#include "hardware/hardware.h"
-#include "scene/event.hpp"
-#include "scene/scene.hpp"
-#include "scene/scene_alarming.hpp"
-#include "scene/scene_configure_alarm.hpp"
-
 // コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
 #ifdef min
 #undef min
@@ -23,6 +15,13 @@
 #undef max
 #endif
 #include <chrono>
+#include <string>
+
+#include "hardware/hardware.h"
+#include "scene/event.hpp"
+#include "scene/scene.hpp"
+#include "scene/scene_alarming.hpp"
+#include "scene/scene_configure_alarm.hpp"
 
 namespace scene {
 
