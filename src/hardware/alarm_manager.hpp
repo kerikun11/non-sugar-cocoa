@@ -2,11 +2,22 @@
 #ifndef _INCLUDE_ALARM_MANAGER_HPP_
 #define _INCLUDE_ALARM_MANAGER_HPP_
 
+// コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#include <atomic>
+#include <functional>
+#include <memory>
 #include <utility>
 
 #include <esp32-hal-log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
+#include <freertos/task.h>
 
 #include "../time_of_day.hpp"
 
@@ -26,11 +37,9 @@ public:
   /// 時刻を設定する。
   ///
   /// 正しく設定コマンドが送信されたとき `true` を返す。
-  bool setAlarmTime(const sugar::TimeOfDay &time) {
-    auto obj = std::make_unique<sugar::TimeOfDay>(time);
-    sugar::TimeOfDay *ptr = obj.release();
-    return xQueueSendToBack(m_queue, &ptr, 0) == pdTRUE;
-  }
+  ///
+  /// ついでに `Hardware::alarmStateCache` も更新する。
+  bool setAlarmTime(const sugar::TimeOfDay &time);
 };
 
 /// アラームイベント発生を担当するクラス。
@@ -41,7 +50,7 @@ public:
 
 private:
   /// アラームが有効化されているか否か。
-  bool m_alarmIsSet;
+  std::atomic_bool m_alarmIsSet;
   /// アラーム設定時刻。
   sugar::TimeOfDay m_alarmTime;
   /// コールバック関数。
@@ -75,9 +84,6 @@ public:
 
   /// アラームが設定されているかどうかを返す。
   bool isAlarmSet() const { return m_alarmIsSet; }
-
-  /// アラームの時刻を設定する。
-  void setAlarmTime(sugar::TimeOfDay t) { m_alarmTime = t; }
 
   /// アラーム設定用オブジェクトを返す。
   // 時刻は別スレッドから設定されることがありうるため、競合を起こさないように

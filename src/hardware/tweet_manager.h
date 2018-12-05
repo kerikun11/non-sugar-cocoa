@@ -44,7 +44,7 @@ private:
   QueueHandle_t eventQueue;
 
   //こいつのtweet関数使ってtweetする
-  StewGate_U Tweeter;   
+  StewGate_U Tweeter;
 
   struct QueueItem {
     std::string str;
@@ -58,13 +58,13 @@ private:
       xQueueReceive(eventQueue, &qi, portMAX_DELAY);
       auto item = std::unique_ptr<QueueItem>{qi};
 
-      if(WiFi.waitForConnectResult() == WL_CONNECTED){
-          Tweeter.tweet(item->str);
-      } else{
-          log_e("WiFi Error");
-          //再度同じ文面をQueueに追加
-          tweet(item->str);
-      }   
+      if (WiFi.waitForConnectResult() == WL_CONNECTED) {
+        Tweeter.tweet(item->str);
+      } else {
+        log_e("WiFi Error");
+        //再度同じ文面をQueueに追加
+        tweet(item->str);
+      }
     }
   }
 };

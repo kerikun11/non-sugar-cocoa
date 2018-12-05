@@ -7,14 +7,6 @@
  */
 #pragma once
 
-#include <string>
-
-#include "hardware/hardware.h"
-#include "scene/event.hpp"
-#include "scene/scene.hpp"
-#include "scene/scene_alarming.hpp"
-#include "scene/scene_configure_alarm.hpp"
-
 // コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
 #ifdef min
 #undef min
@@ -23,6 +15,14 @@
 #undef max
 #endif
 #include <chrono>
+#include <cstdio>
+#include <string>
+
+#include "hardware/hardware.h"
+#include "scene/event.hpp"
+#include "scene/scene.hpp"
+#include "scene/scene_alarming.hpp"
+#include "scene/scene_configure_alarm.hpp"
 
 namespace scene {
 
@@ -44,6 +44,9 @@ public:
   virtual EventResult activated() override {
     // ごみを消去
     updateDisplayClock(true); //< 完全再描画
+    if (hardware::Hardware::isAlarmEnabled()) {
+      DrawAlarmTime(hardware::Hardware::alarmTimeCache());
+    }
     log_i("SceneClock activated()");
     return EventResultKind::Continue;
   }
@@ -164,6 +167,18 @@ protected:
       }
       M5.Lcd.drawNumber(ss, xpos, ysecs, 6); // Draw seconds
     }
+  }
+
+  // 画面上部にアラーム時刻を描画する関数
+  void DrawAlarmTime(sugar::TimeOfDay time) const {
+    char buf[9] = {'\0'};
+    // C++14 なのに `std::snprintf` がない処理系は何をやっても駄目
+    std::sprintf(buf, "%02d:%02d:%02d", time.hour(), time.minute(),
+                 time.second());
+    std::string str = "Alarm : ";
+    str += buf;
+    // strを描画
+    M5.Lcd.drawString(str.c_str(), 10, 10, 2);
   }
 };
 
