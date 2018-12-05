@@ -61,11 +61,7 @@ public:
     auto now_count = m_hardware->shaking().getCount();
 
     if (now_count >= max_count) {
-      m_hardware->speaker().stop(); //音の停止
-
-      //カウントの停止とリセット
-      m_hardware->shaking().stopCount();
-      m_hardware->shaking().resetCount();
+      stopAlarm();
 
       m_hardware->tweet().tweet(
           "はいプロ\n世界一起床が上手\n起床界のtourist\n布団時代の終"
@@ -81,7 +77,7 @@ public:
     if (std::chrono::system_clock::now() > m_timelimit_to_stop) {
 
       //起床失敗 tweet & alarm停止
-      m_hardware->speaker().stop();
+      stopAlarm();
 
       m_hardware->tweet().tweet("絶起");
       log_i("SceneAlarming kisyou_failed Finish");
@@ -148,6 +144,17 @@ private:
     str += " [s]";
     // 描画
     M5.Lcd.drawRightString(str.c_str(), 300, 220, 2);
+  }
+
+  void stopAlarm() {
+    m_hardware->speaker().stop(); //音の停止
+
+    //カウントの停止とリセット
+    m_hardware->shaking().stopCount();
+    m_hardware->shaking().resetCount();
+
+    // スレッドローカルなアラーム状態キャッシュを更新
+    hardware::Hardware::setAlarmEnabled(false);
   }
 };
 
