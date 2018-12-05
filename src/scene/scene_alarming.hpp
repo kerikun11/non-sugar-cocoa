@@ -11,6 +11,8 @@
 #include "scene/event.hpp"
 #include "scene/scene.hpp"
 
+#include <cstdlib>
+
 // コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
 #ifdef min
 #undef min
@@ -37,6 +39,8 @@ public:
     M5.Lcd.clear();
     //文字色設定
     M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
+    // 描画
+    drawShakingCount(max_count, true);
 
     //アラーム音の再生を開始
     m_hardware->speaker().play(hardware::SpeakerManager::Music::Alarm);
@@ -71,7 +75,7 @@ public:
     }
 
     int remain_count = max_count - m_hardware->shaking().getCount();
-    updateLcd(remain_count);
+    updateLcd(remain_count, remain_count);
 
     //アラーム制限時間処理
     if (std::chrono::system_clock::now() > m_timelimit_to_stop) {
@@ -101,19 +105,49 @@ protected:
       std::chrono::system_clock::now();
 
 private:
-  void updateLcd(int remain_count) const {
+  void updateLcd(int remain_count, int sec, bool clean = false) const {
+    // 中央のふる回数の表示
+    drawShakingCount(remain_count, clean);
+    // 右下の残り時間の表示
+    DrawContactAfter(sec, clean);
+  }
+
+  void drawShakingCount(int remain_count, bool clean) const {
     static int prev_count = 0;
-    if (remain_count == prev_count)
+    if (!clean && remain_count == prev_count)
       return;
     prev_count = remain_count;
     //描画位置
     int xpos = 160;
-    int ypos = 85 - 24; // Top left corner ot clock text, about half way down
+    int ypos = 75 - 24; // Top left corner ot clock text, about half way down
 
     //描画処理
+    // 文字は白で表示
+    M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
     M5.Lcd.drawCentreString("Shake to Stop!", xpos, ypos, 4); // Draw hours
     ypos += 54;
+    // ふる回数は黄色で表示
+    M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
     M5.Lcd.drawCentreString(String(remain_count, DEC), xpos, ypos, 8);
+  }
+
+  // 右下の描画をする
+  void DrawContactAfter(int sec, bool clean) const {
+    static int prev_count = 0;
+    if (!clean && sec == prev_count)
+      return;
+    prev_count = sec;
+    M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
+    // 描画文字列str。文字列がずれる時の対策として先頭に半角スペースを数個追加する
+    std::string str = " Automatically Send a Message After ";
+    // sprintfで秒数を格納する
+    char c[10];
+    // str+=std::to_string(30);//< コンパイル通らないんやが
+    sprintf(c, "%d", sec);
+    str += c;
+    str += " [s]";
+    // 描画
+    M5.Lcd.drawRightString(str.c_str(), 300, 220, 2);
   }
 };
 
