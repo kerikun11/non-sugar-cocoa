@@ -51,3 +51,6 @@ public:
 private:
   std::string token;
 };
+
+//global object
+extern StewGate_U Tweeter;

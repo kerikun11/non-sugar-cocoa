@@ -10,6 +10,7 @@
 #include "hardware/hardware.h"
 #include "scene/event.hpp"
 #include "scene/scene.hpp"
+#include "../../lib/stewgate_u/stewgate_u.h"
 
 namespace scene {
 
@@ -36,6 +37,9 @@ public:
     m_hardware->shaking().resetCount();
     m_hardware->shaking().startCount();
 
+    //アラーム鳴ってからの経過時間を0に初期化
+    passed_time_from_alarming = 0;
+
     return EventResultKind::Continue;
   }
 
@@ -51,12 +55,31 @@ public:
       m_hardware->shaking().stopCount();
       m_hardware->shaking().resetCount();
 
-      log_i("SceneAlerming Finish");
+      Tweeter.tweet("はいプロ\n世界一起床が上手\n起床界のtourist\n布団時代の終焉を告げる者\n実質朝\n起床するために生まれてきた男"); 
+      log_i("SceneAlerming kisyou_success Finish");
       return EventResultKind::Finish;
     }
 
     int remain_count = max_count - m_hardware->shaking().getCount();
     updateLcd(remain_count);
+
+    //アラーム制限時間処理
+    passed_time_from_alarming += 1;
+    if(passed_time_from_alarming >= max_alarming_time){
+      
+      //起床失敗 tweet & alarm停止
+      m_hardware->speaker().stop();
+      
+      m_hardware->shaking().stopCount();
+      m_hardware->shaking().resetCount();
+
+      passed_time_from_alarming = 0;
+
+      Tweeter.tweet("絶起"); 
+      log_i("SceneAlerming kisyou_failed Finish");
+
+      return EventResultKind::Finish;
+    }
 
     return EventResultKind::Continue;
   }
@@ -67,7 +90,8 @@ protected:
   std::shared_ptr<hardware::Hardware> m_hardware;
 
   const int max_count = 5; // 100回振ると，アラーム停止
-
+  const int max_alarming_time = 20; //アラームが鳴り続ける制限時間．これを過ぎるとぜっきTweet
+  int passed_time_from_alarming = 0;
 private:
   void updateLcd(int remain_count) const {
     static int prev_count = 0;
