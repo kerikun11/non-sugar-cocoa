@@ -56,7 +56,7 @@ public:
     /// アラーム設定へ
     return EventResult(EventResultKind::PushScene,
                        static_cast<void *>(new SceneConfigureAlarm(
-                           m_hardware->alarm().alarmTimeSetter())));
+                           m_hardware->alarm().alarmTimeSetter(),m_hardware->tweet().   )));
   }
 
 protected:
