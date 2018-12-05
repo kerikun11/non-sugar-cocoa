@@ -44,6 +44,7 @@ public:
   virtual EventResult activated() override {
     // ごみを消去
     updateDisplayClock(true); //< 完全再描画
+    DrawAlarmTime(sugar::TimeOfDay());//< 来たときのみアラーム時刻の描画処理をする
     log_i("SceneClock activated()");
     return EventResultKind::Continue;
   }
@@ -164,6 +165,14 @@ protected:
       }
       M5.Lcd.drawNumber(ss, xpos, ysecs, 6); // Draw seconds
     }
+  }
+
+  // 画面上部にアラーム時刻を描画する関数
+  void DrawAlarmTime(sugar::TimeOfDay tod)const{
+    // らりお：todを文字列化して
+    std::string str="Alarm : 00:00:00";
+    // strを描画
+    M5.Lcd.drawString(str.c_str(),10,10,2);
   }
 };
 
