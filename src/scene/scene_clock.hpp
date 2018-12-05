@@ -52,7 +52,8 @@ public:
   virtual EventResult buttonAPressed() override {
     /// アラーム設定へ
     return EventResult(EventResultKind::PushScene,
-                       static_cast<void *>(new SceneConfigureAlarm()));
+                       static_cast<void *>(new SceneConfigureAlarm(
+                           m_hardware->alarm().alarmTimeSetter())));
   }
 
   /// ボタン
@@ -69,16 +70,15 @@ protected:
     //アニメーションのための数値
     static uint8_t frame = 0;
     frame++;
-    //現在時刻の取得
-    int hh = 0, mm = 0, ss = 0, ms = 0;
-    struct tm timeinfo;
-    if (getLocalTime(&timeinfo)) {
-      hh = timeinfo.tm_hour;
-      mm = timeinfo.tm_min;
-      ss = timeinfo.tm_sec;
-      auto now = std::chrono::system_clock::now().time_since_epoch();
-      ms = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
-    }
+    // 現在時刻の取得
+    auto now = std::chrono::system_clock::now().time_since_epoch() +
+               std::chrono::hours(9); //< 日本時間: +9h
+    int hh = std::chrono::duration_cast<std::chrono::hours>(now).count() % 24;
+    int mm = std::chrono::duration_cast<std::chrono::minutes>(now).count() % 60;
+    int ss = std::chrono::duration_cast<std::chrono::seconds>(now).count() % 60;
+    int ms =
+        std::chrono::duration_cast<std::chrono::milliseconds>(now).count() %
+        1000;
     //時刻描画
     displayClock(clean, hh, mm, ss, ms);
     //ボタン説明の描画
@@ -100,17 +100,18 @@ protected:
 
   void displayClock(bool clean, int hh, int mm, int ss, int ms) const {
     //直前に描画を行った分・秒の値。これが現在時刻と異なっていたら描画する。分・秒が絶対に取りえない値で初期化することで、初めてのdrawClock()では描画処理が必ず発生するようにする
-    static byte omm = 99, oss = 99;
+    static byte omm = 99;
     static byte xcolon = 0, xsecs = 0;
     // 明るく描画するか
     static bool lightColon = true; // 500msごとに切り替える
 
+    //文字色設定
+    M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
     //描画準備
     if (clean) {
       M5.Lcd.clear();
+      M5.Lcd.drawCentreString("Alarm Clock", 160, 0, 8);
     }
-    //文字色設定
-    M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
     //描画位置
     int xpos = 0;
     int ypos = 85; // Top left corner ot clock text, about half way down
@@ -139,11 +140,10 @@ protected:
       xsecs = xpos; // Sae seconds 'x' position for later display updates
     }
     //毎秒の秒の描画
-    if (clean || lightColon != (ms % 1000 < 500)) {
+    if (clean || lightColon != (ms < 500)) {
       // ossの更新をし、秒の値が変わっていないうちは描画処理を行わないようにする
-      oss = ss;
       xpos = xsecs;
-      lightColon = (ms % 1000 < 500);
+      lightColon = (ms < 500);
       //":"の描画
       if (!lightColon) {
         // lightColonを見て：の明るさの描画を決める

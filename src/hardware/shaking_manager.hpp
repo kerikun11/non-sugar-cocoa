@@ -17,7 +17,7 @@ public:
   void begin() {
     // FreeRTOS により task() をバックグラウンドで実行
     const uint16_t stackSize = 4096;
-    UBaseType_t uxPriority = 1;
+    UBaseType_t uxPriority = 10;
     xTaskCreate(
         [](void *this_obj) { static_cast<ShakingManager *>(this_obj)->task(); },
         "ShakingManager", stackSize, this, uxPriority, NULL);
@@ -28,9 +28,7 @@ protected:
 
   MPU9250 IMU; // 9 axis Sensor
 
-  const float threshold_swing_angle_axis =
-      200;       // 1カウントと見なす，角速度の大きさ(正の値)
-  int count = 0; //現在のカウント数
+  int count = 0;                                   //現在のカウント数
   const int sampling_period = 100;                 //[ms]
   ShakingState shaking_state = ShakingState::Stop; //カウント計測の状態
 
@@ -42,10 +40,9 @@ protected:
     // handleEvent の定期実行
     portTickType xLastWakeTime = xTaskGetTickCount();
     while (1) {
-      vTaskDelayUntil(&xLastWakeTime, sampling_period / portTICK_RATE_MS);
-
       updateMeasurement();
       updateCount();
+      vTaskDelayUntil(&xLastWakeTime, sampling_period / portTICK_RATE_MS);
     }
     vTaskDelete(NULL);
   }

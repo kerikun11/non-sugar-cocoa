@@ -11,7 +11,7 @@ void ShakingManager::updateMeasurement() {
   if (!initialized) {
     initialized = true;
     Wire.begin();
-    // IMU.calibrateMPU9250(IMU.gyroBias, IMU.accelBias);
+    IMU.calibrateMPU9250(IMU.gyroBias, IMU.accelBias);
     IMU.initMPU9250();
     IMU.initAK8963(IMU.magCalibration);
   }
@@ -57,15 +57,14 @@ void ShakingManager::updateMeasurement() {
     IMU.mz = (float)IMU.magCount[2] * IMU.mRes * IMU.magCalibration[2] -
              IMU.magbias[2];
   }
-
-  // Must be called before updating quaternions!
-  IMU.updateTime();
 }
 
 void ShakingManager::updateCount() {
 
   //とりあえずx方向の角速度のみを使って検知
-  auto swing_angle_velocity = IMU.gx;
+  auto swing_angle_velocity = IMU.ay;
+  // 1カウントと見なす，角速度の大きさ(正の値)
+  const float threshold_swing_angle_axis = 1.6;
 
   switch (shaking_state) {
 

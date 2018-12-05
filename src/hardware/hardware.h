@@ -9,6 +9,7 @@
 
 #include <M5Stack.h>
 
+#include "alarm_manager.hpp"
 #include "button_manager.h"
 #include "shaking_manager.hpp"
 #include "speaker_manager.h"
@@ -20,6 +21,7 @@ namespace hardware {
 
 class Hardware {
 private:
+  AlarmManager m_alarm;
   ButtonManager m_button;
   SpeakerManager m_speaker;
   Ticker m_ticker;
@@ -29,8 +31,8 @@ public:
   void begin() {
     // M5Stack includes LCD, SD, M5.Btn, M5.Speaker,...
     M5.begin();
-    //時計合わせ
-    ntpInit();
+    // Alarm
+    m_alarm.begin();
     // Speaker
     m_speaker.begin();
     // Button
@@ -48,10 +50,11 @@ public:
   void onButtonEvent(ButtonManager::EventCallback callback) {
     m_button.onEvent(callback);
   }
-  /// WiFi接続(ブロッキング)
-  void connectWiFi() const;
-  /// WiFi切断
-  void disconnectWiFi() const;
+  void onAlarmEvent(AlarmManager::EventCallback callback) {
+    m_alarm.onEvent(callback);
+  }
+  /// Button manager.
+  AlarmManager &alarm() { return m_alarm; }
   /// Button manager.
   ButtonManager &button() { return m_button; }
   /// Speaker manager.
@@ -62,8 +65,6 @@ public:
   ShakingManager &shaking() { return m_shaking; }
 
 private:
-  /// 時計合わせ(ブロッキング)
-  void ntpInit() const;
 };
 
 }; // namespace hardware
