@@ -14,6 +14,7 @@
 #include "shaking_manager.hpp"
 #include "speaker_manager.h"
 #include "ticker.h"
+#include "tweet_manager.h"
 
 #include <memory>
 
@@ -26,6 +27,7 @@ private:
   SpeakerManager m_speaker;
   Ticker m_ticker;
   ShakingManager m_shaking;
+  TweetManager m_tweet;
 
 public:
   void begin() {
@@ -42,6 +44,9 @@ public:
     m_shaking.begin();
     // Ticker
     m_ticker.begin();
+
+    //Tweet
+    m_tweet.begin();
   }
   /// Tickerイベントを割り当てする
   void onTickEvent(Ticker::EventCallback callback) {
