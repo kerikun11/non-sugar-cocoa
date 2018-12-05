@@ -5,6 +5,10 @@
 #include <esp32-hal-log.h>
 #include <string>
 
+class StewGate_U;
+// global object
+extern StewGate_U Tweeter;
+
 class StewGate_U {
 public:
   static constexpr const char *hostname = "stewgate-u.appspot.com";
@@ -51,6 +55,3 @@ public:
 private:
   std::string token;
 };
-
-//global object
-extern StewGate_U Tweeter;

@@ -1,5 +1,5 @@
 /**
- * @file scene_alerming.hpp
+ * @file scene_alarming.hpp
  * @author Sekihara Takeshi (seki.maq.kan@gmail.com)
  * @brief 現在時刻を表示するシーン
  * @version 0.1
@@ -10,7 +10,7 @@
 #include "hardware/hardware.h"
 #include "scene/event.hpp"
 #include "scene/scene.hpp"
-#include "../../lib/stewgate_u/stewgate_u.h"
+#include "stewgate_u/stewgate_u.h"
 
 namespace scene {
 
