@@ -54,6 +54,8 @@ public:
   void begin() {
     // M5Stack includes LCD, SD, M5.Btn, M5.Speaker,...
     M5.begin();
+    // Wire
+    Wire.begin();
     // Alarm
     m_alarm.begin();
     // Speaker
