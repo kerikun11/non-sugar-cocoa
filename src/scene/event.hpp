@@ -19,6 +19,8 @@ enum class EventKind {
   ///
   /// データ部に `std::unique_ptr<ButtonEvent>` を持つ。
   Button,
+  /// アラームイベント。
+  Alarm,
 };
 
 /// シーンに対するイベント。

@@ -20,6 +20,25 @@ public:
   SceneAlarming(std::shared_ptr<hardware::Hardware> &m_hardware)
       : m_hardware(m_hardware) {}
 
+  /// シーンがスタックのトップに来たとき呼ばれる。
+  virtual EventResult activated() override {
+    log_i("SceneAlerming activated()");
+
+    // LCDのクリア
+    M5.Lcd.clear();
+    //文字色設定
+    M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
+
+    //アラーム音の再生を開始
+    m_hardware->speaker().play(hardware::SpeakerManager::Music::Alarm);
+
+    // hardware側の振動回数の初期化(Countを使用するのは一人だと仮定．よそで勝手に操作されると困る)
+    m_hardware->shaking().resetCount();
+    m_hardware->shaking().startCount();
+
+    return EventResultKind::Continue;
+  }
+
   /// 定期的に (タイマーイベントごとに) 呼ばれる。
   virtual EventResult tick() override {
 
@@ -42,24 +61,6 @@ public:
     return EventResultKind::Continue;
   }
 
-  /// シーンがスタックのトップに来たとき呼ばれる。
-  virtual EventResult activated() override {
-
-    log_i("SceneAlerming activated()");
-
-    // LCDのクリア
-    M5.Lcd.clear();
-
-    //アラーム音の再生を開始
-    m_hardware->speaker().play(hardware::SpeakerManager::Music::Alarm);
-
-    // hardware側の振動回数の初期化(Countを使用するのは一人だと仮定．よそで勝手に操作されると困る)
-    m_hardware->shaking().resetCount();
-    m_hardware->shaking().startCount();
-
-    return EventResultKind::Continue;
-  }
-
   /// ボタンが押されても何もしないので，ボタン関連overrideはしない
 
 protected:
@@ -73,19 +74,14 @@ private:
     if (remain_count == prev_count)
       return;
     prev_count = remain_count;
-    //描画準備
-    //文字色設定
-    M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
     //描画位置
-    int xpos = 0;
+    int xpos = 160;
     int ypos = 85 - 24; // Top left corner ot clock text, about half way down
 
     //描画処理
-    //毎分の時間・分の描画（分が変更していれば、時間は変わっていなくても時間を描画しなおす）
-    xpos += M5.Lcd.drawString("Shake!", xpos, ypos, 0); // Draw hours
-    xpos = 0;
-    ypos += 24;
-    xpos += M5.Lcd.drawNumber(remain_count, xpos, ypos, 8); // Draw hours
+    M5.Lcd.drawCentreString("Shake to Stop!", xpos, ypos, 4); // Draw hours
+    ypos += 54;
+    M5.Lcd.drawCentreString(String(remain_count, DEC), xpos, ypos, 8);
   }
 };
 

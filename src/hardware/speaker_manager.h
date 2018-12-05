@@ -67,7 +67,7 @@ private:
       switch (item->e) {
       case Event::Play:
         log_d("Play");
-        // M5.Speaker.beep();
+        M5.Speaker.beep();
         break;
       case Event::Stop:
         log_d("Stop");
