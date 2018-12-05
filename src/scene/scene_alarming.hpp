@@ -11,6 +11,8 @@
 #include "scene/event.hpp"
 #include "scene/scene.hpp"
 
+#include <cstdlib>
+
 namespace scene {
 
 // アラーム設定時刻になった後，アラーム音が鳴り続けている最中のScene
@@ -76,12 +78,29 @@ private:
     prev_count = remain_count;
     //描画位置
     int xpos = 160;
-    int ypos = 85 - 24; // Top left corner ot clock text, about half way down
+    int ypos = 75 - 24; // Top left corner ot clock text, about half way down
 
     //描画処理
+    // 文字は白で表示
+    M5.Lcd.setTextColor(TFT_WHITE,TFT_BLACK);
     M5.Lcd.drawCentreString("Shake to Stop!", xpos, ypos, 4); // Draw hours
     ypos += 54;
+    // ふる回数は黄色で表示
+    M5.Lcd.setTextColor(TFT_YELLOW,TFT_BLACK);
     M5.Lcd.drawCentreString(String(remain_count, DEC), xpos, ypos, 8);
+    // 右下の残り時間は白で表示
+    M5.Lcd.setTextColor(TFT_WHITE,TFT_BLACK);
+    std::string str="    Contact after ";//< 文字列がずれる時の対策として先頭に半角スペースを数個追加する
+    {
+      char c[10];
+      static int sec=999;
+      //str+=std::to_string(30);//< コンパイル通らないんやが
+      sprintf(c,"%d",sec);
+      str+=c;
+      sec--;
+    }
+    str+=" seconds...";
+    M5.Lcd.drawRightString(str.c_str(),300,220,2);
   }
 };
 
