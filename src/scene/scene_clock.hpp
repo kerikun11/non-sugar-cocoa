@@ -168,10 +168,10 @@ protected:
     // C++14 なのに `std::snprintf` がない処理系は何をやっても駄目
     std::sprintf(buf, "%02d:%02d:%02d", time.hour(), time.minute(),
                  time.second());
-    std::string str = "Alarm : ";
+    std::string str = "Alarm Time ";
     str += buf;
     // strを描画
-    M5.Lcd.drawString(str.c_str(), 10, 10, 2);
+    M5.Lcd.drawCentreString(str.c_str(), 160, 14, 4);
   }
 };
 
