@@ -72,6 +72,15 @@ protected:
 
 private:
   void updateLcd(int remain_count) const {
+    // 中央のふる回数の表示
+    drawShakingCount(remain_count);
+    // 右下の残り時間の表示
+    static int sec=150;
+    sec--;
+    DrawContactAfter(sec);
+  }
+
+  void drawShakingCount(int remain_count) const {
     static int prev_count = 0;
     if (remain_count == prev_count)
       return;
@@ -88,19 +97,21 @@ private:
     // ふる回数は黄色で表示
     M5.Lcd.setTextColor(TFT_YELLOW,TFT_BLACK);
     M5.Lcd.drawCentreString(String(remain_count, DEC), xpos, ypos, 8);
-    // 右下の残り時間は白で表示
+  }
+
+  // 右下の描画をする
+  void DrawContactAfter(int sec)const{
     M5.Lcd.setTextColor(TFT_WHITE,TFT_BLACK);
-    std::string str="    Contact after ";//< 文字列がずれる時の対策として先頭に半角スペースを数個追加する
-    {
-      char c[10];
-      static int sec=999;
-      //str+=std::to_string(30);//< コンパイル通らないんやが
-      sprintf(c,"%d",sec);
-      str+=c;
-      sec--;
-    }
+    // 描画文字列str。文字列がずれる時の対策として先頭に半角スペースを数個追加する
+    std::string str="    Contact after ";
+    // sprintfで秒数を格納する
+    char c[10];
+    //str+=std::to_string(30);//< コンパイル通らないんやが
+    sprintf(c,"%d",sec);
+    str+=c;
     str+=" seconds...";
-    M5.Lcd.drawRightString(str.c_str(),300,220,2);
+    // 描画
+    M5.Lcd.drawRightString(str.c_str(),300,220,2);    
   }
 };
 
