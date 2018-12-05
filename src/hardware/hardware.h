@@ -44,8 +44,7 @@ public:
     m_shaking.begin();
     // Ticker
     m_ticker.begin();
-
-    //Tweet
+    // Tweet
     m_tweet.begin();
   }
   /// Tickerイベントを割り当てする
@@ -58,7 +57,7 @@ public:
   void onAlarmEvent(AlarmManager::EventCallback callback) {
     m_alarm.onEvent(callback);
   }
-  /// Button manager.
+  /// Alarm manager.
   AlarmManager &alarm() { return m_alarm; }
   /// Button manager.
   ButtonManager &button() { return m_button; }
@@ -68,6 +67,8 @@ public:
   Ticker &ticker() { return m_ticker; }
   /// Shaking manager.
   ShakingManager &shaking() { return m_shaking; }
+  /// Tweet manager.
+  TweetManager &tweet() { return m_tweet; }
 
 private:
 };
