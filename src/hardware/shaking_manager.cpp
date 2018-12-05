@@ -10,7 +10,6 @@ void ShakingManager::updateMeasurement() {
   static bool initialized = false;
   if (!initialized) {
     initialized = true;
-    Wire.begin();
     IMU.calibrateMPU9250(IMU.gyroBias, IMU.accelBias);
     IMU.initMPU9250();
     IMU.initAK8963(IMU.magCalibration);
