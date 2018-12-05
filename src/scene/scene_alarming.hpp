@@ -65,7 +65,7 @@ public:
 
       m_hardware->tweet().tweet(
           "はいプロ\n世界一起床が上手\n起床界のtourist\n布団時代の終"
-          "焉を告げる者\n実質朝\n起床するために生まれてきた男\\");
+          "焉を告げる者\n実質朝\n起床するために生まれてきた男");
       log_i("SceneAlarming kisyou_success Finish");
       return EventResultKind::Finish;
     }
