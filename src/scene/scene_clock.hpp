@@ -52,18 +52,11 @@ public:
   }
 
   /// ボタン
-  virtual EventResult buttonAPressed() override {
+  virtual EventResult buttonBPressed() override {
     /// アラーム設定へ
     return EventResult(EventResultKind::PushScene,
                        static_cast<void *>(new SceneConfigureAlarm(
                            m_hardware->alarm().alarmTimeSetter())));
-  }
-
-  /// ボタン
-  virtual EventResult buttonBPressed() override {
-    /// アラーム設定へ
-    return EventResult(EventResultKind::PushScene,
-                       static_cast<void *>(new SceneAlarming(m_hardware)));
   }
 
 protected:
@@ -95,9 +88,9 @@ protected:
           height;
     }
     M5.Lcd.setTextColor(TFT_PINK, TFT_BLACK);
-    M5.Lcd.fillRect(42, topY, 50, y - topY, TFT_BLACK); //文字を消す
-    M5.Lcd.drawString(
-        "SET", 42, y,
+    M5.Lcd.fillRect(42, topY, 160, y - topY, TFT_BLACK); //文字を消す
+    M5.Lcd.drawCentreString(
+        "SET", 160, y,
         4); //フォントサイズ4で3文字の描画を左ボタンの上にするなら、(42,205)に描画
   }
 
