@@ -48,7 +48,7 @@ public:
     }
     // 時間を取得し終わったら次のシーンへ
     if (time(NULL) > 30 * 365 * 24 * 60 * 60) {
-      WiFi.mode(WIFI_OFF);
+      // WiFi.mode(WIFI_OFF);
       return EventResult(EventResultKind::ReplaceScene,
                          static_cast<void *>(new SceneClock(m_hardware)));
     }
