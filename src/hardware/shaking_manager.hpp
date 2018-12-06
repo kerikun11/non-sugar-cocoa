@@ -6,10 +6,16 @@ namespace hardware {
 class ShakingManager {
 
 public:
-  void resetCount() { count = 0; } //カウント値リセット
+  //カウント値リセット
+  void resetCount() {
+    count = 0;
+    dir_x_state.count = 0;
+    dir_y_state.count = 0;
+    dir_z_state.count = 0;
+  }
   void stopCount() { shaking_state = ShakingState::Stop; } //カウント再開/開始
   void startCount() {
-    shaking_state = ShakingState::CountingUpperSwing;
+    shaking_state = ShakingState::Counting;
   }                                 //カウント一次停止
   int getCount() { return count; }; //現在のカウント数
 
@@ -24,16 +30,27 @@ public:
   }
 
 protected:
-  enum class ShakingState { CountingUpperSwing, CountingLowerSwing, Stop };
+  enum class ShakingState { Counting, Stop };
 
-  MPU9250 IMU; // 9 axis Sensor
+  // X,Y,Z三方向の振動状態
+  enum class OneDirection { UpperSwing, LowerSwing };
+  struct OneDirectionState {
+    int count = 0;
+    OneDirection state = OneDirection::UpperSwing;
+  };
+  
+   MPU9250 IMU; // 9 axis Sensor
 
-  int count = 0;                                   //現在のカウント数
-  const int sampling_period = 100;                 //[ms]
+  int count = 0 ; //現在のカウント数
+  const int sampling_period = 100;                      //[ms]
   ShakingState shaking_state = ShakingState::Stop; //カウント計測の状態
-
+  OneDirectionState dir_x_state;
+  OneDirectionState dir_y_state;
+  OneDirectionState dir_z_state;
+  
   void updateMeasurement(); // IMU値の更新
   void updateCount();       //振った回数の更新
+  OneDirectionState dirStateChange(float swing_axis, OneDirectionState dir_state);
 
   // FreeRTOS によって実行される関数
   void task() {
