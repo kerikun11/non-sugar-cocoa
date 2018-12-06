@@ -45,10 +45,11 @@ private:
   Cursor m_cursor;
   /// 時刻設定機構。
   hardware::AlarmTimeSetter m_alarmTimeSetter;
+  std::shared_ptr<hardware::Hardware> m_hardware;
 
 public:
-  SceneConfigureAlarm(hardware::AlarmTimeSetter timeSetter,)
-      : m_alarmTime{}, m_cursor{Cursor::Hour}, m_alarmTimeSetter{timeSetter} {}
+  SceneConfigureAlarm(hardware::AlarmTimeSetter timeSetter,std::shared_ptr<hardware::Hardware> &m_hardware) 
+  : m_alarmTime{}, m_cursor{Cursor::Hour}, m_alarmTimeSetter{timeSetter}, m_hardware{m_hardware} {}
 
   /// シーンがスタックのトップに来たとき呼ばれる。
   virtual EventResult activated() override {
@@ -98,7 +99,8 @@ public:
       time_str += char_m;
       time_str += ":";
       time_str += char_s;
-      m_hardware->
+      m_hardware->tweet().tweet(time_str + 
+        "に起きるよ．絶対寝坊したりなんかしない！，キリッ！");
       return EventResultKind::Finish;
     }
     // 時間設定を続行するので画面を更新する
