@@ -71,7 +71,12 @@ public:
     }
 
     int remain_count = max_count - m_hardware->shaking().getCount();
-    updateLcd(remain_count, remain_count);
+
+    // 絶起までの秒数を算出
+    auto now = std::chrono::system_clock::now(); //< 現在時刻
+    auto left_s = std::chrono::duration_cast<std::chrono::seconds>(
+        m_timelimit_to_stop - now); //< 時間の差分
+    updateLcd(remain_count, left_s.count() + 1);
 
     //アラーム制限時間処理
     if (std::chrono::system_clock::now() > m_timelimit_to_stop) {
@@ -135,7 +140,7 @@ private:
     prev_count = sec;
     M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
     // 描画文字列str。文字列がずれる時の対策として先頭に半角スペースを数個追加する
-    std::string str = " Automatically Send a Message After ";
+    std::string str = " Send a Message After ";
     // sprintfで秒数を格納する
     char c[10];
     // str+=std::to_string(30);//< コンパイル通らないんやが
