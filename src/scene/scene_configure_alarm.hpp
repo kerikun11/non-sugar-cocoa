@@ -13,6 +13,9 @@
 #include "../time_of_day.hpp"
 #include "scene.hpp"
 
+#include <cstdlib>
+#include <string>
+
 // コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
 #ifdef min
 #undef min
@@ -43,10 +46,13 @@ private:
   Cursor m_cursor;
   /// 時刻設定機構。
   hardware::AlarmTimeSetter m_alarmTimeSetter;
+  std::shared_ptr<hardware::Hardware> m_hardware;
 
 public:
-  SceneConfigureAlarm(hardware::AlarmTimeSetter timeSetter)
-      : m_alarmTime{}, m_cursor{Cursor::Hour}, m_alarmTimeSetter{timeSetter} {}
+  SceneConfigureAlarm(hardware::AlarmTimeSetter timeSetter,
+                      std::shared_ptr<hardware::Hardware> &m_hardware)
+      : m_alarmTime{}, m_cursor{Cursor::Hour}, m_alarmTimeSetter{timeSetter},
+        m_hardware{m_hardware} {}
 
   /// シーンがスタックのトップに来たとき呼ばれる。
   virtual EventResult activated() override {
@@ -83,6 +89,20 @@ public:
     if (m_cursor == Cursor::Hour) {
       // 設定した時間を送信する。
       m_alarmTimeSetter.setAlarmTime(m_alarmTime);
+
+      // TimeOfDay => string変換
+      char char_h[3], char_m[3], char_s[3];
+      std::string time_str = "明日は ";
+      sprintf(char_h, "%d", m_alarmTime.hour());
+      sprintf(char_m, "%d", m_alarmTime.minute());
+      sprintf(char_s, "%d", m_alarmTime.second());
+      time_str += char_h;
+      time_str += ":";
+      time_str += char_m;
+      time_str += ":";
+      time_str += char_s;
+      m_hardware->tweet().tweet(
+          time_str + " に起きるよ．絶対寝坊したりなんかしない！，キリッ！");
       return EventResultKind::Finish;
     }
     // 時間設定を続行するので画面を更新する
