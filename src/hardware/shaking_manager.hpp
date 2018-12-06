@@ -1,6 +1,4 @@
 #pragma once
-#include <utility/MPU9250.h>
-
 // コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
 #ifdef min
 #undef min
@@ -8,6 +6,11 @@
 #ifdef max
 #undef max
 #endif
+
+#include <atomic>
+
+#include <utility/MPU9250.h>
+
 namespace hardware {
 
 class ShakingManager {
@@ -45,19 +48,20 @@ protected:
     int count = 0;
     OneDirection state = OneDirection::UpperSwing;
   };
-  
-   MPU9250 IMU; // 9 axis Sensor
 
-  int count = 0 ; //現在のカウント数
-  const int sampling_period = 100;                      //[ms]
+  MPU9250 IMU; // 9 axis Sensor
+
+  std::atomic_int count{0};                        //現在のカウント数
+  const int sampling_period = 100;                 //[ms]
   ShakingState shaking_state = ShakingState::Stop; //カウント計測の状態
   OneDirectionState dir_x_state;
   OneDirectionState dir_y_state;
   OneDirectionState dir_z_state;
-  
+
   void updateMeasurement(); // IMU値の更新
   void updateCount();       //振った回数の更新
-  OneDirectionState dirStateChange(float swing_axis, OneDirectionState dir_state);
+  OneDirectionState dirStateChange(float swing_axis,
+                                   OneDirectionState dir_state);
 
   // FreeRTOS によって実行される関数
   void task() {

@@ -1,7 +1,16 @@
-#include "shaking_manager.hpp"
+// コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include <M5Stack.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+
+#include "shaking_manager.hpp"
 
 namespace hardware {
 
@@ -73,9 +82,9 @@ void ShakingManager::updateCount() {
     dir_y_state = dirStateChange(swing_angle_velocity_y, dir_y_state);
     dir_z_state = dirStateChange(swing_angle_velocity_z, dir_z_state);
 
-    count = std::max(count, dir_x_state.count);
-    count = std::max(count, dir_y_state.count);
-    count = std::max(count, dir_z_state.count);
+    count = std::max(count.load(), dir_x_state.count);
+    count = std::max(count.load(), dir_y_state.count);
+    count = std::max(count.load(), dir_z_state.count);
 
     dir_x_state.count = count;
     dir_y_state.count = count;
@@ -88,8 +97,8 @@ void ShakingManager::updateCount() {
   }
 }
 
-ShakingManager::OneDirectionState ShakingManager::dirStateChange(float swing_axis,
-                                                 OneDirectionState dir_state) {
+ShakingManager::OneDirectionState
+ShakingManager::dirStateChange(float swing_axis, OneDirectionState dir_state) {
   OneDirectionState next_state = dir_state;
   const float threshold_swing_angle_axis = 1.6;
   switch (dir_state.state) {
