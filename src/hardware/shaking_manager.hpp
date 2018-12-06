@@ -1,6 +1,13 @@
 #pragma once
 #include <utility/MPU9250.h>
 
+// コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 namespace hardware {
 
 class ShakingManager {
