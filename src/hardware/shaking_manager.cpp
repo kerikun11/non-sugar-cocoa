@@ -97,8 +97,8 @@ void ShakingManager::updateCount() {
   }
 }
 
-ShakingManager::OneDirectionState ShakingManager::dirStateChange(float swing_axis,
-                                                 OneDirectionState dir_state) {
+ShakingManager::OneDirectionState
+ShakingManager::dirStateChange(float swing_axis, OneDirectionState dir_state) {
   OneDirectionState next_state = dir_state;
   const float threshold_swing_angle_axis = 1.6;
   switch (dir_state.state) {
