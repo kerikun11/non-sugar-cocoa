@@ -44,6 +44,7 @@ public:
 
     //アラーム音の再生を開始
     m_hardware->speaker().play(hardware::SpeakerManager::Music::Alarm);
+    tick_counter_for_beep = 0;
 
     // hardware側の振動回数の初期化(Countを使用するのは一人だと仮定．よそで勝手に操作されると困る)
     m_hardware->shaking().resetCount();
@@ -57,6 +58,14 @@ public:
 
   /// 定期的に (タイマーイベントごとに) 呼ばれる。
   virtual EventResult tick() override {
+
+    //音のON/OFF処理
+    tick_counter_for_beep += 1;
+    if( static_cast<int>(tick_counter_for_beep / 10) % 2 == 0){
+      m_hardware->speaker().stop();
+    }else{
+      m_hardware->speaker().play(hardware::SpeakerManager::Music::Alarm); 
+    }
 
     auto now_count = m_hardware->shaking().getCount();
 
@@ -96,6 +105,8 @@ protected:
   const int max_count = 5;
   //アラームが鳴り続ける最大時間．これを過ぎるとぜっきTweet
   const std::chrono::seconds alarming_duration{10};
+
+  int tick_counter_for_beep = 0;
 
   std::chrono::system_clock::time_point m_timelimit_to_stop =
       std::chrono::system_clock::now();
