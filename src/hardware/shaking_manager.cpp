@@ -1,7 +1,16 @@
-#include "shaking_manager.hpp"
+// コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include <M5Stack.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+
+#include "shaking_manager.hpp"
 
 namespace hardware {
 
@@ -10,7 +19,6 @@ void ShakingManager::updateMeasurement() {
   static bool initialized = false;
   if (!initialized) {
     initialized = true;
-    Wire.begin();
     IMU.calibrateMPU9250(IMU.gyroBias, IMU.accelBias);
     IMU.initMPU9250();
     IMU.initAK8963(IMU.magCalibration);
@@ -62,33 +70,56 @@ void ShakingManager::updateMeasurement() {
 void ShakingManager::updateCount() {
 
   //とりあえずx方向の角速度のみを使って検知
-  auto swing_angle_velocity = IMU.ay;
-  // 1カウントと見なす，角速度の大きさ(正の値)
-  const float threshold_swing_angle_axis = 1.6;
+  auto swing_angle_velocity_x = IMU.ax;
+  auto swing_angle_velocity_y = IMU.ay;
+  auto swing_angle_velocity_z = IMU.az;
 
   switch (shaking_state) {
 
-  case ShakingState::CountingUpperSwing:
+  case ShakingState::Counting:
 
-    if (swing_angle_velocity > threshold_swing_angle_axis) {
-      count++;
-      log_d("up");
-      shaking_state = ShakingState::CountingLowerSwing;
-    }
-    break;
+    dir_x_state = dirStateChange(swing_angle_velocity_x, dir_x_state);
+    dir_y_state = dirStateChange(swing_angle_velocity_y, dir_y_state);
+    dir_z_state = dirStateChange(swing_angle_velocity_z, dir_z_state);
 
-  case ShakingState::CountingLowerSwing:
+    count = std::max(count.load(), dir_x_state.count);
+    count = std::max(count.load(), dir_y_state.count);
+    count = std::max(count.load(), dir_z_state.count);
 
-    if (swing_angle_velocity < -threshold_swing_angle_axis) {
-      // count++;
-      log_d("down");
-      shaking_state = ShakingState::CountingUpperSwing;
-    }
+    dir_x_state.count = count;
+    dir_y_state.count = count;
+    dir_z_state.count = count;
+
     break;
 
   case ShakingState::Stop:
     break;
   }
+}
+
+ShakingManager::OneDirectionState
+ShakingManager::dirStateChange(float swing_axis, OneDirectionState dir_state) {
+  OneDirectionState next_state = dir_state;
+  const float threshold_swing_angle_axis = 1.6;
+  switch (dir_state.state) {
+
+  case OneDirection::UpperSwing:
+    if (swing_axis > threshold_swing_angle_axis) {
+      next_state.count++;
+      log_d("up");
+      next_state.state = OneDirection::LowerSwing;
+    }
+    break;
+
+  case OneDirection::LowerSwing:
+    if (swing_axis < -threshold_swing_angle_axis) {
+      log_d("down");
+      next_state.state = OneDirection::UpperSwing;
+    }
+    break;
+  }
+
+  return next_state;
 }
 
 }; // namespace hardware

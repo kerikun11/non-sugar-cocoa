@@ -13,6 +13,9 @@
 #include "../time_of_day.hpp"
 #include "scene.hpp"
 
+#include <cstdlib>
+#include <string>
+
 // コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
 #ifdef min
 #undef min
@@ -43,10 +46,13 @@ private:
   Cursor m_cursor;
   /// 時刻設定機構。
   hardware::AlarmTimeSetter m_alarmTimeSetter;
+  std::shared_ptr<hardware::Hardware> m_hardware;
 
 public:
-  SceneConfigureAlarm(hardware::AlarmTimeSetter timeSetter)
-      : m_alarmTime{}, m_cursor{Cursor::Hour}, m_alarmTimeSetter{timeSetter} {}
+  SceneConfigureAlarm(hardware::AlarmTimeSetter timeSetter,
+                      std::shared_ptr<hardware::Hardware> &m_hardware)
+      : m_alarmTime{}, m_cursor{Cursor::Hour}, m_alarmTimeSetter{timeSetter},
+        m_hardware{m_hardware} {}
 
   /// シーンがスタックのトップに来たとき呼ばれる。
   virtual EventResult activated() override {
@@ -83,6 +89,20 @@ public:
     if (m_cursor == Cursor::Hour) {
       // 設定した時間を送信する。
       m_alarmTimeSetter.setAlarmTime(m_alarmTime);
+
+      // TimeOfDay => string変換
+      char char_h[3], char_m[3], char_s[3];
+      std::string time_str = "明日は ";
+      sprintf(char_h, "%d", m_alarmTime.hour());
+      sprintf(char_m, "%d", m_alarmTime.minute());
+      sprintf(char_s, "%d", m_alarmTime.second());
+      time_str += char_h;
+      time_str += ":";
+      time_str += char_m;
+      time_str += ":";
+      time_str += char_s;
+      m_hardware->tweet().tweet(
+          time_str + " に起きるよ．絶対寝坊したりなんかしない！，キリッ！");
       return EventResultKind::Finish;
     }
     // 時間設定を続行するので画面を更新する
@@ -154,9 +174,46 @@ private:
     M5.Lcd.fillRect(rightX, rectY, width, height, TFT_PINK);
     M5.Lcd.fillRect(rightX + (width - height) / 2, rectY + (height - width) / 2,
                     height, width, TFT_PINK);
+    // 今指し示しているものがわかるように、数字の上下に三角形の描画
+    static Cursor beforeCursor = Cursor::Second;
+    if (beforeCursor != m_cursor) {
+      // 前フレームで描画していた三角形の描画削除
+      DrawProcessTriangle(beforeCursor, TFT_BLACK);
+      // 今フレームで描画する三角形の描画
+      DrawProcessTriangle(m_cursor, TFT_YELLOW);
+      beforeCursor = m_cursor;
+    }
 
     // 時刻部分の更新
     updateDisplayClock();
+  }
+
+  // 現在設定している部分の描画
+  void DrawProcessTriangle(Cursor cursor, uint16_t color) const {
+    // 描画位置の決定
+    int x = -100, y1 = -100, y2 = -100;
+    const int v1x = 5, v1y = 7;
+    const int v2x = 10, v2y = 0;
+    switch (cursor) {
+    case (Cursor::Hour):
+      x = 51;
+      y1 = 75;
+      y2 = 175;
+      break;
+    case (Cursor::Minute):
+      x = 187;
+      y1 = 75;
+      y2 = 175;
+      break;
+    case (Cursor::Second):
+      x = 285;
+      y1 = 100;
+      y2 = 155;
+      break;
+    }
+    //描画
+    M5.Lcd.fillTriangle(x, y1, x + v1x, y1 - v1y, x + v2x, y1 - v2y, color);
+    M5.Lcd.fillTriangle(x, y2, x + v1x, y2 + v1y, x + v2x, y2 + v2y, color);
   }
 
   // 画面のうち時刻部分を更新する

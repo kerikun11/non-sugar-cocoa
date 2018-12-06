@@ -48,6 +48,8 @@ public:
 
 private:
   QueueHandle_t eventQueue;
+  // サンプリング周期
+  static constexpr int PeriodMillis = 100;
 
   enum class Event {
     Play,
@@ -58,22 +60,36 @@ private:
     Music m;
   };
 
+  Event state = Event::Stop; //< 再生状態
+
   // FreeRTOS によって実行される関数
   void task() {
     while (1) {
-      QueueItem *qi;
-      xQueueReceive(eventQueue, &qi, portMAX_DELAY);
-      auto item = std::unique_ptr<QueueItem>{qi};
-      switch (item->e) {
-      case Event::Play:
-        log_d("Play");
+      // 点滅した音を鳴らす
+      // waitの間はイベント待ちなので，イベントを取り損ねることはない．
+      if (state == Event::Play)
         M5.Speaker.beep();
-        break;
-      case Event::Stop:
-        log_d("Stop");
+      waitWithHandleQueueEvent(50);
+      if (state == Event::Play)
         M5.Speaker.mute();
-        break;
-      }
+      waitWithHandleQueueEvent(950);
+    }
+    vTaskDelete(NULL);
+  }
+  void waitWithHandleQueueEvent(int wait_ms) {
+    QueueItem *qi;
+    if (pdTRUE != xQueueReceive(eventQueue, &qi, wait_ms / portTICK_PERIOD_MS))
+      return;
+    auto item = std::unique_ptr<QueueItem>{qi};
+    state = item->e;
+    switch (item->e) {
+    case Event::Play:
+      log_d("Play");
+      break;
+    case Event::Stop:
+      log_d("Stop");
+      M5.Speaker.mute();
+      break;
     }
   }
 };

@@ -7,14 +7,6 @@
  */
 #pragma once
 
-#include <string>
-
-#include "hardware/hardware.h"
-#include "scene/event.hpp"
-#include "scene/scene.hpp"
-#include "scene/scene_alarming.hpp"
-#include "scene/scene_configure_alarm.hpp"
-
 // コンパイルエラーを防ぐため， Arduino.h で定義されているマクロをundef
 #ifdef min
 #undef min
@@ -23,6 +15,14 @@
 #undef max
 #endif
 #include <chrono>
+#include <cstdio>
+#include <string>
+
+#include "hardware/hardware.h"
+#include "scene/event.hpp"
+#include "scene/scene.hpp"
+#include "scene/scene_alarming.hpp"
+#include "scene/scene_configure_alarm.hpp"
 
 namespace scene {
 
@@ -44,23 +44,19 @@ public:
   virtual EventResult activated() override {
     // ごみを消去
     updateDisplayClock(true); //< 完全再描画
+    if (hardware::Hardware::isAlarmEnabled()) {
+      DrawAlarmTime(hardware::Hardware::alarmTimeCache());
+    }
     log_i("SceneClock activated()");
     return EventResultKind::Continue;
-  }
-
-  /// ボタン
-  virtual EventResult buttonAPressed() override {
-    /// アラーム設定へ
-    return EventResult(EventResultKind::PushScene,
-                       static_cast<void *>(new SceneConfigureAlarm(
-                           m_hardware->alarm().alarmTimeSetter())));
   }
 
   /// ボタン
   virtual EventResult buttonBPressed() override {
     /// アラーム設定へ
     return EventResult(EventResultKind::PushScene,
-                       static_cast<void *>(new SceneAlarming(m_hardware)));
+                       static_cast<void *>(new SceneConfigureAlarm(
+                           m_hardware->alarm().alarmTimeSetter(), m_hardware)));
   }
 
 protected:
@@ -92,9 +88,9 @@ protected:
           height;
     }
     M5.Lcd.setTextColor(TFT_PINK, TFT_BLACK);
-    M5.Lcd.fillRect(42, topY, 50, y - topY, TFT_BLACK); //文字を消す
-    M5.Lcd.drawString(
-        "SET", 42, y,
+    M5.Lcd.fillRect(42, topY, 160, y - topY, TFT_BLACK); //文字を消す
+    M5.Lcd.drawCentreString(
+        "SET", 160, y,
         4); //フォントサイズ4で3文字の描画を左ボタンの上にするなら、(42,205)に描画
   }
 
@@ -164,6 +160,18 @@ protected:
       }
       M5.Lcd.drawNumber(ss, xpos, ysecs, 6); // Draw seconds
     }
+  }
+
+  // 画面上部にアラーム時刻を描画する関数
+  void DrawAlarmTime(sugar::TimeOfDay time) const {
+    char buf[9] = {'\0'};
+    // C++14 なのに `std::snprintf` がない処理系は何をやっても駄目
+    std::sprintf(buf, "%02d:%02d:%02d", time.hour(), time.minute(),
+                 time.second());
+    std::string str = "Alarm Time ";
+    str += buf;
+    // strを描画
+    M5.Lcd.drawCentreString(str.c_str(), 160, 14, 4);
   }
 };
 
