@@ -79,7 +79,12 @@ public:
       //起床失敗 tweet & alarm停止
       stopAlarm();
 
-      m_hardware->tweet().tweet("絶起");
+      m_hardware->tweet().tweet(
+          "From : 3・4限寝太郎\nおはようございます。"
+          "\n大変申し訳ございませんが、寝坊をしてしまいました。\n"
+          "今はまだ寝ていますが，そのうち起きます。\n起床後は、このような"
+          "ことがないよう自己管理には十分気をつけるはずです。\n申し訳ご"
+          "ざいません。");
       log_i("SceneAlarming kisyou_failed Finish");
       return EventResultKind::Finish;
     }
